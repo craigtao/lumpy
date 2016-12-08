@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="lumpy::core::Buffer&lt;*&gt;">
+    <Expand>
+      <Item Name="[capicity]">capicity_</Item>
+      <Item Name="[size]">size_</Item>
+      <ArrayItems>
+        <Size>size_</Size>
+        <ValuePointer>data_</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="lumpy::core::ArrayView&lt;*,*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>size_</Size>
+        <ValuePointer>data_</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="lumpy::core::Vec&lt;*,*&gt;">
+    <Expand>
+      <ArrayItems>
+        <Size>$T2</Size>
+        <ValuePointer>data_</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="lumpy::math::Array&lt;*,*,*&gt;">
+    <Expand>
+      <Item Name="shape">shape_</Item>
+      <Item Name="strice">stride_</Item>
+      <ArrayItems>
+        <Rank>$T2</Rank>
+        <Size>shape_[$i]</Size>
+        <ValuePointer>data_</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="lumpy::json::JNode">
+    <DisplayString Condition="type==0">null </DisplayString>
+    <DisplayString Condition="type==1">true </DisplayString>
+    <DisplayString Condition="type==2">false</DisplayString>
+    <DisplayString Condition="type==3">{*(double*)(this+1)}</DisplayString>
+    <DisplayString Condition="type==4">{*(char**)(this+1), [size]s}</DisplayString>
+    <DisplayString Condition="type==6">[array ] [{size}]</DisplayString>
+    <DisplayString Condition="type==7">[object] {{{size}}} </DisplayString>
+    <Expand>
+      <LinkedListItems Condition="type==6 || type==7">
+        <Size>size</Size>
+        <HeadPointer>this+1</HeadPointer>
+        <NextPointer>this+right</NextPointer>
+        <ValueNode>*this</ValueNode>
+      </LinkedListItems>
+      <Item Name="key"   Condition="type==5">*(char**)(this+1), [size]s</Item>
+      <Item Name="value" Condition="type==5">*(this+2)</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="lumpy::json::Pair&lt;*,*&gt;">
+    <DisplayString>{key}:  {value}</DisplayString>
+  </Type>
+
+</AutoVisualizer>

@@ -1,0 +1,22 @@
+import os;
+
+env = Environment(
+    CXX = 'clang++',
+    CPPPATH     = ['.'],
+    CCFLAGS	= '-D_LUMPY_BUILD_ ',
+    CXXFLAGS    = '--std=c++14 -Wall ')
+
+config		= ARGUMENTS.get('config')
+
+if (config == 'release'):
+    env.Append(CCFLAGS = '-O2 -DNMS_TEST_PERFORMANCE ')
+else:
+    env.Append(CCFLAGS = '-g ')
+
+env['ENV']['TERM'] = os.environ['TERM']
+
+lumpy_src       = [Glob('lumpy/*.cc'), Glob('lumpy/*/*.cc', exclude=('lumpy/cuda/*.cc'))]
+lumpy_lib       = env.Library('lib/lumpy', lumpy_src)
+
+unittest_src	= [Glob('unittest/*.cc'), Glob('unittest/*/*.cc')]
+unittest_app	= env.Program('bin/lumpy.unittest', unittest_src, LIBS=lumpy_lib)
