@@ -2,7 +2,7 @@
 the missing c++1z common library for you.
 
 ## 1. lumpy/core
-   - comple time caculate
+   - type traits
    - string
    - format
    - exception
