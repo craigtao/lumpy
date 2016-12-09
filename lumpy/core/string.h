@@ -30,7 +30,7 @@ struct FormatSpec
   char    fill   = ' ';  // [a-z0-9]
   char    align  = '>';  // [<>=]
   char    sign   = '\0';  // [+-]
-  int8_t  width  = +0;    // [0-9]*
+  uint8_t width  = +0;    // [0-9]*
   int8_t  prec   = -1;    // [0-9]*
   char    type   = '\0';  // [a-z]
 };

@@ -57,10 +57,9 @@ static bool sem_trywait(sem_t* sem) {
 #ifdef _LUMPY_OS_UNIX_
 namespace unix
 {
-
 static sem_t* sem_open(uint value) {
-    char buffer[256] = "sem.XXXXXX";
-    auto name= mktemp(buffer);
+    char name[] = "lumpy.thread.sem.XXXXXX";
+    mkstemp(name);
     auto sem = ::sem_open(name, O_CREAT, 0, value);
     if (sem == SEM_FAILED) {  throw ESystem(errno); }
     return sem;
