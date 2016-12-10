@@ -21,6 +21,7 @@
 
 #ifdef _LUMPY_OS_UNIX_
 #include <unistd.h>
+#include <fcntl.h>
 #include <semaphore.h>
 #endif
 

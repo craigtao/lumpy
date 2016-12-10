@@ -22,12 +22,6 @@ namespace lumpy
 inline namespace thread
 {
 
-#if   defined(_LUMPY_OS_UNIX_)
-using sem_t = int;
-#elif defined(_LUMPY_OS_WINDOWS_)
-using sem_t = void;
-#endif
-
 class Semaphore final: INocopyable
 {
   public:
@@ -40,7 +34,11 @@ class Semaphore final: INocopyable
     bool       operator--(int);
 
   private:
+#if defined(_LUMPY_BUILD_) && defined(_LUMPY_OS_UNIX_)
     sem_t*  sem_;
+#else
+    void*   sem_;
+#endif
 };
 
 }

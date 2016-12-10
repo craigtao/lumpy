@@ -1,7 +1,7 @@
 import os;
 
 env = Environment(
-    CXX = 'clang++',
+    CXX		= 'clang++',
     CPPPATH     = ['.'],
     CCFLAGS	= '-D_LUMPY_BUILD_ ',
     CXXFLAGS    = '--std=c++14 -Wall ')
@@ -15,8 +15,13 @@ else:
 
 env['ENV']['TERM'] = os.environ['TERM']
 
+lumpy_libs      = []
+if env['PLATFORM'] == 'posix':  # linux
+    lumpy_libs  = lumpy_libs + ['pthread']
+
+
 lumpy_src       = [Glob('lumpy/*.cc'), Glob('lumpy/*/*.cc', exclude=('lumpy/cuda/*.cc'))]
-lumpy_lib       = env.Library('lib/lumpy', lumpy_src)
+lumpy_lib       = env.Library('lib/lumpy', lumpy_src, LIBS=lumpy_libs)
 
 unittest_src	= [Glob('unittest/*.cc'), Glob('unittest/*/*.cc')]
-unittest_app	= env.Program('bin/lumpy.unittest', unittest_src, LIBS=lumpy_lib)
+unittest_app	= env.Program('bin/lumpy.unittest', unittest_src, LIBS=lumpy_libs+[lumpy_lib])
