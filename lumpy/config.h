@@ -25,6 +25,7 @@
 #include <type_traits>
 #include <functional>
 #include <vector>
+#include <chrono>
 
 #include <lumpy/config/version.h>
 #include <lumpy/config/build.h>

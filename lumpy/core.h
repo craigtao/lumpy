@@ -19,10 +19,11 @@
 #include <lumpy/core/type.h>
 #include <lumpy/core/traits.h>
 #include <lumpy/core/vec.h>
-
-#include <lumpy/core/string.h>
 #include <lumpy/core/exception.h>
+
 #include <lumpy/core/memory.h>
+#include <lumpy/core/string.h>
+#include <lumpy/core/format.h>
 
 #include <lumpy/core/algorithm.h>
 #include <lumpy/core/datetime.h>

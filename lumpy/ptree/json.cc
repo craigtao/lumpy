@@ -17,7 +17,7 @@
 namespace lumpy
 {
 
-namespace ptree
+namespace json
 {
 
 static bool isspace(char c) {
@@ -72,6 +72,11 @@ static StringView parse_string(cstring &s, cstring e) {
             if(isspace(t))  { parse_failed(s); }
             else            { ++s; }
         }
+        if (ubyte(*s)== 0b11000000){ s+=1;}  // utf-8
+        if (ubyte(*s)== 0b11100000){ s+=2;}  // utf-8
+        if (ubyte(*s)== 0b11110000){ s+=3;}  // utf-8
+        if (ubyte(*s)== 0b11111000){ s+=4;}  // utf-8
+        if (ubyte(*s)== 0b11111100){ s+=5;}  // utf-8
     }
     ++s;
 
@@ -117,7 +122,7 @@ static JNode& parse_key(cstring& s, cstring e, JDoc& json, JNode* proot, JNode* 
     if (peek_char(s, e) != '"') parse_failed(s);
 
     auto    key = parse_string(s, e);
-    if (pleft != nullptr && pleft->right != 0) {
+    if (pleft != nullptr && pleft->next_ != 0) {
         parse_failed(s);
     }
     auto&   item = json.add_item(proot, pleft, JKeyVal{ key.str, key.size });
@@ -135,13 +140,13 @@ static JNode& parse_object(cstring& s, cstring e, JDoc& json, JNode* proot, JNod
     while (*s) {
         auto& key = parse_key(s, e, json, root, left);
         left = &key;
-        if (left != nullptr && left->right != 0) parse_failed(s);
+        if (left != nullptr && left->next_ != 0) parse_failed(s);
 
         if (peek_char(s, e) != ':') parse_failed(s);
         ++s;
 
         auto& val = parse_any(s, e, json, nullptr, nullptr); (void)val;
-        if (left != nullptr && left->right != 0) {
+        if (left != nullptr && left->next_ != 0) {
             parse_failed(s);
         }
 
@@ -155,7 +160,7 @@ static JNode& parse_object(cstring& s, cstring e, JDoc& json, JNode* proot, JNod
 }
 
 static JNode& parse_any(cstring &s, cstring e, JDoc& json, JNode* proot, JNode* pleft) {
-    if (pleft != nullptr && pleft->right != 0) {
+    if (pleft != nullptr && pleft->next_ != 0) {
         parse_failed(s);
     }
     // ignore space
@@ -221,11 +226,21 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
         case JType::True:  sformat(buffer, "true");        break;
         case JType::False: sformat(buffer, "false");       break;
 
-        case JType::Number: { auto* obj = reinterpret_cast<const JNumber*>(&head); sformat(buffer, obj->value, spec);           break; }
-        case JType::String: { auto* obj = reinterpret_cast<const JString*>(&head); buffer.push(obj->string - 1, obj->size + 2); break; }
+        case JType::Number: {
+            auto* obj = reinterpret_cast<const JNumber*>(&head);
+            sformat(buffer, obj->value, spec);
+            break;
+        }
+
+        case JType::String: {
+            auto* obj = reinterpret_cast<const JString*>(&head);
+            buffer.push('"');
+            buffer.push(obj->string, obj->size);
+            buffer.push('"');
+            break;
+        }
 
         case JType::Array: {
-
             if (head.size != 0) {
                 buffer.push("[\n");
                 auto item = &head + 1;
@@ -244,6 +259,7 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
             }
             break;
         }
+
         case JType::Object: {
             if (head.size != 0) {
                 buffer.push("{\n");
@@ -251,7 +267,12 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
                 while (item != nullptr) {
                     auto& key = *reinterpret_cast<const JKeyVal*>(item);
                     auto& val = key.value();
-                    sindent(buffer, level+1, true); buffer.push(key.string-1, key.size+2); buffer.push(": ");
+                    sindent(buffer, level+1, true);
+
+                    buffer.push('"');
+                    buffer.push(key.string, key.size);
+                    buffer.push("\": ");
+
                     sformat(buffer, val, spec, level+1, false);
                     item = item->next();
 
@@ -276,4 +297,4 @@ void sformat(IStringBuffer& buffer, const JNode& node, const FormatSpec& spec) {
 
 }  // json
 
-}   // lumpy
+}  // lumpy

@@ -38,7 +38,7 @@ class EFile: public IException
             : eid_(eid), path_(path), message_(message)
     {}
 
-    void sformat(IStringBuffer& buffer) const {
+    void sformat(IStringBuffer& buffer, const FormatSpec& spec) const {
         buffer.formats("path='{}', message='{}'", path_, message_);
     }
   protected:

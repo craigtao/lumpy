@@ -104,7 +104,7 @@ class LogItem: public INocopyable
     template<class Value>
     auto& operator<<(const Value& value) {
         if (level_ >= getDefaultLogger().level())  {
-            buffer_.format(value);
+            sformat(buffer_, value);
         }
         return *this;
     }

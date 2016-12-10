@@ -57,10 +57,10 @@ struct MethodInfo {
         catch (IException& e) {
             static StringBuffer buffer;
             buffer.clear();
-            e.sformat(buffer);
+            e.sformat(buffer, {});
 
             ::printf("\033[33m[    throw]\033[0;0m  throw (%s)\n", cxxabi::demangle(typeid(e)));
-            ::printf("\033[33m[    !!!!!]\033[0;0m    { %.*s }\n", uint(buffer.size()), buffer.c_str());
+            ::printf("\033[33m[    !!!!!]\033[0;0m    { %.*s }\n", uint(buffer.size()), buffer.data());
         }
         catch (...) {
             ::printf("\033[33m[     throw]\033[0m  throw (%s)\n", "unknow");

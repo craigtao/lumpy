@@ -14,37 +14,106 @@
  */
 #pragma once
 
+#include <lumpy/core/type.h>
+#include <lumpy/core/traits.h>
+
 namespace lumpy
 {
 
 namespace ptree
 {
 
-template<class T, class Enabled=void>
-class Value
+template<class T>
+struct PNode
 {
-public:
-    explicit Value(T& value) : value_(&value) {}
+    constexpr PNode(T value): value_(value) {}
 
-private:
-    T* value_;
+    template<class V> void visit(V&& v) const {
+        v.val(value_);
+    }
+  protected:
+    T   value_;
 };
 
-template<class T> Value<T> makeSerializer(T& value) {
-    return {value};
-}
+template<class T> auto proxy(T&       value) -> decltype(value.ptree()) { return value.ptree(); }
+template<class T> auto proxy(const T& value) -> decltype(value.ptree()) { return value.ptree(); }
+
+template<class T> PNode<T&>       proxy(T&       value, If<isReal<T>>* = nullptr) { return {value}; }
+template<class T> PNode<const T&> proxy(const T& value, If<isReal<T>>* = nullptr) { return {value}; }
+
+inline PNode<string&>        proxy(string&  	 value) { return {value}; }
+inline PNode<const string&>  proxy(const string& value) { return {value}; }
 
 template<class T>
-class Array
+struct PArray
 {
-public:
-    explicit Array(T* value, uint size) : value_(value), size_(size) {}
-    auto operator[](uint idx) { return makeSerializer(value_[idx]); }
+  public:
+    constexpr PArray(T* array, uint size): array_(array), size_(size) {}
 
-private:
-    T*      value_;
-    uint    size_;
+    template<class V> void visit(V&& v) const {
+        v.beginArray();
+        for(size_t i = 0; i < size_; ++i) {
+            proxy(array_[i]).visit(std::forward<V>(v));
+        }
+        v.end();
+    }
+  protected:
+    T*      array_;
+    size_t  size_;
 };
 
+template<class T>  PArray<      T> proxy(      T  array[], size_t size) { return { array, size}; }
+template<class T>  PArray<const T> proxy(const T  array[], size_t size) { return { array, size}; }
+
+template<class T, size_t size> PArray<      T> proxy(      T (&array)[size]) { return { array, size}; }
+template<class T, size_t size> PArray<const T> proxy(const T (&array)[size]) { return { array, size}; }
+
+template<class ...T>
+struct PObject
+{
+  public:
+    constexpr static const auto size = sizeof...(T);
+
+    constexpr PObject(Arg<T> ...arg): keys_{arg.key...}, vals_{arg.val...} {}
+
+    template<class V> void visit(V&& v) const {
+        v.beginObject();
+        visit_dispatch<0>(std::forward<V>(v), TBool<true>{});
+        v.end();
+     }
+  protected:
+    cstring     keys_[sizeof...(T)];
+    Tuple<T...> vals_;
+
+    template<uint I, class V> void visit_dispatch(V&& v, TBool<true>) const {
+        v.key(keys_[I]);
+        proxy(vals_.template at<I>()).visit(v);
+        visit_dispatch<I+1>(std::forward<V>(v), TBool<(I+1<size)>{});
+    }
+
+    template<uint I, class V> void visit_dispatch(V&& v, TBool<false>) const {
+    }
+};
+
+template<class T>    auto& proxy(      PNode<T>&      node) { return node; }
+template<class T>    auto& proxy(const PNode<T>&      node) { return node; }
+template<class T>    auto& proxy(      PArray<T>&     arr)  { return arr;  }
+template<class T>    auto& proxy(const PArray<T>&     arr)  { return arr;  }
+template<class ...T> auto& proxy(      PObject<T...>& obj)  { return obj;  }
+template<class ...T> auto& proxy(const PObject<T...>& obj)  { return obj;  }
+
+template<class T, class ...U>
+PObject<T,U...> proxy(Arg<T> arg, Arg<U> ...args) {
+    return {arg, args...};
 }
+
+template<class ...T>
+auto toPTree(T&& ...t) {
+    return proxy(std::forward<T>(t)...);
+}
+
+}
+
+using ptree::toPTree;
+
 }

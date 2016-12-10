@@ -12,7 +12,7 @@
  * You shold have received a copy of the GNU General Public License alone with the program.
  * If not, see <http://www.gnu.org/licenses/>
  */
-#include <lumpy/core/string.h>
+#include <lumpy/core/format.h>
 
 namespace lumpy
 {
@@ -182,8 +182,12 @@ EBufferOverflow::EBufferOverflow(size_t size, size_t capicity, size_t extent)
         : size_(size), capicity_(capicity), extent_(extent)
 {}
 
-void EBufferOverflow::sformat(IStringBuffer& buffer) const {
+void EBufferOverflow::sformat(IStringBuffer& buffer, const FormatSpec& spec) const {
     buffer.formats("size={}, capicity={}, extent={}", size_, capicity_, extent_);
+}
+
+void EBufferOverflow::sformat(IStringBuffer& buffer) const {
+    sformat(buffer, {});
 }
 
 }

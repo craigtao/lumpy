@@ -86,13 +86,13 @@ template<class Data, uint Rank>
 void sformat(IStringBuffer& buffer, const Slice<Data, Rank>& obj, FormatSpec spec=FormatSpec{})
 {
     const auto size = obj.shape(Rank - 1);
-    if (Rank==1) buffer.format("[");
+    if (Rank==1) buffer.push("[");
     for (size_t i = 0; i < size; ++i) {
-        if (Rank != 1) buffer.format("\n\t");
-        buffer.format(obj[i], spec);
-        if (Rank==1 && i != size-1) buffer.format(",");
+        if (Rank != 1) buffer.push("\n\t");
+        sformat(buffer, obj[i], spec);
+        if (Rank==1 && i != size-1) buffer.push(",");
     }
-    if (Rank==1) buffer.format("]");
+    if (Rank==1) buffer.push("]");
 }
 
 }

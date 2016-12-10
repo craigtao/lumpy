@@ -47,17 +47,20 @@ template<class T> constexpr bool isUInt  = std::is_unsigned<T>::value;
 template<class T,    class U>        constexpr auto isSame = std::is_same<T, U>::value;
 template<class Base, class Derived > constexpr auto isBase = std::is_base_of<Base, Derived >::value;
 
-template<class T> constexpr T&  asLRef(T&  val) { return val;                   }
-template<class T> constexpr T&  asLRef(T&& val) { return static_cast<T&>(val);  }
-
-template<class T> constexpr T&& asRRef(T&  val) { return static_cast<T&&>(val); }
-template<class T> constexpr T&& asRRef(T&& val) { return val;                   }
-
 template<class T>   using TRemoveRef    = typename std::remove_reference<T>::type;
 template<class T>   using TRemoveConst  = typename std::remove_const<T>::type;
 
+template<class T> constexpr T&      asLRef(T&       val) { return val;                  }
+template<class T> constexpr T&&     asLRef(const T& val) { return const_cast<T&>(val);  }
+template<class T> constexpr void    asLRef(T&&      val) { static_assert(sizeof(T)>0, "cannot convert rval-ref to lval-ref"); }
+
+template<class T> constexpr T&&     asRRef(T&       val) { return static_cast<T&&>(val);}
+template<class T> constexpr T&&     asRRef(const T& val) { static_assert(sizeof(T)>0, "const reference cannot convert to rvalue-reference"); }
+template<class T> constexpr T&&     asRRef(T&&      val) { return val;                  }
+
 template<class T, uint=0> constexpr T&& take(typename std::remove_reference<T>::type&  value) noexcept { return (static_cast<T&&>(value)); }
 template<class T, uint=0> constexpr T&& take(typename std::remove_reference<T>::type&& value) noexcept { return (static_cast<T&&>(value)); }
+
 
 }
 }

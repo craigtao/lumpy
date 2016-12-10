@@ -16,15 +16,15 @@ lumpy_unit(json) {
             path.clear();
             path.formats("data/json/pass{}.json", i);
 
-            auto text = readAll(path.c_str());
+            auto text = readAll(path.data());
 
             try {
                 JDoc json(text.c_str(), text.size());
                 auto& value = json.value();
-                log_trace("json{:2s} = {}\n", i, value);
+                log_debug("json{:2s} = {}\n", i, value);
             }
-            catch (ptree::EJParseFailed& e) {
-                log_error("{:2s} not pass", i);
+            catch (json::EJParseFailed& e) {
+                log_error("parse fail: pass{}.json", i);
                 log_error << e;
                 throw e;
             }
@@ -41,18 +41,18 @@ lumpy_unit(json) {
             path.formats("data/json/fail{}.json", i);
 
             try {
-                auto text = readAll(path.c_str());
+                auto text = readAll(path.data());
                 JDoc json(text.c_str(), text.size());
                 log_error("json{:2s} = {}\n", i, json.value());
             }
-            catch (ptree::EJParseFailed&) {
+            catch (json::EJParseFailed&) {
                 ++fail_count;
-                log_debug("{:2s} pase fail", i);
+                log_debug("pase fail: fail{}.json", i);
             }
         }
     }
 
-#ifdef NMS_TEST_PERFORMANCE
+#ifdef NDEBUG
     lumpy_test(performance) {
         File twitter("data/json/twitter.json", File::Read);
         const auto size = twitter.size();

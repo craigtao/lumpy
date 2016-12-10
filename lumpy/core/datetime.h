@@ -14,7 +14,7 @@
  */
 #pragma once
 
-#include <chrono>
+#include <lumpy/core/type.h>
 
 namespace lumpy
 {

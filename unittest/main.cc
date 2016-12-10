@@ -1,16 +1,13 @@
 #include <lumpy/test.h>
 
-
-void setup_env()
-{
+void setup_env() {
 #ifdef _WIN32
     system("chcp 65001");           // set code page utf8
     setlocale(LC_ALL, "C.UTF-8");   // set locale to c.utf-8
 #endif
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     setup_env();
     try {
         auto unit = argc<1 ? "" : argv[1];

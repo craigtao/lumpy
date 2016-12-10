@@ -54,7 +54,26 @@ template<class T> constexpr auto      toSInt(const T& t) { return std::make_sign
 template<class T> constexpr auto      toUInt(const T& t) { return std::make_unsigned_t<T>(t);   }
 
 /* --- dollar $         --- */
-struct Dollar { constexpr Dollar() = default; };
+template<class T>
+struct Arg
+{
+    cstring key;
+    T       val;
+};
+
+struct TArg
+{
+    cstring str;
+    template<class T> constexpr Arg<T&>       operator=(T&       val) const { return {str, val}; };
+    template<class T> constexpr Arg<const T&> operator=(const T& val) const { return {str, val}; };
+};
+
+struct Dollar {
+    constexpr Dollar() = default;
+
+    template<size_t N> constexpr TArg operator[](const char (&key)[N]) const { return {key}; }
+};
+
 static const Dollar $ = {};
 
 template<class T>           constexpr T operator-(Dollar dollar, T offset) { return T(-1) - offset;                            }
@@ -172,6 +191,57 @@ template<class T, uint N> constexpr auto prod(const Immutable<T,N>& v) { return 
 template<class T, uint N> constexpr auto all (const Immutable<T,N>& v) { return reduce(Fand{}, v.elements); }
 template<class T, uint N> constexpr auto any (const Immutable<T,N>& v) { return reduce(For {}, v.elements); }
 
+
+/* --- tuple        --- */
+template<class ...T> struct Tuple;
+
+template<>
+struct Tuple<>
+{
+    constexpr static const uint size = 0;
+};
+
+template<class T>
+struct Tuple<T>
+{
+    constexpr static const uint size = 1;
+
+    template<class U> constexpr Tuple(U&& u): value(std::forward<U>(u)) {}
+
+    template<uint I> T&                 at()                 { static_assert(I==0, "out of range"); return value; }
+    template<uint I> constexpr const T& at() const noexcept  { static_assert(I==0, "out of range"); return value; }
+
+protected:
+    T value;
+};
+
+template<class T, class ...Ts>
+struct Tuple<T, Ts...>
+{
+    constexpr static const uint size = uint(1+sizeof...(Ts));
+
+    template<class U, class ...Us> constexpr Tuple(U&& u, Us&& ...us): value(std::forward<U>(u)), values(std::forward<Us>(us)...) {}
+
+    template<uint I> auto&           at()                { return at_dispatch<I>(TBool<I==0>{});  }
+    template<uint I> constexpr auto& at() const noexcept { return at_dispatch<I>(TBool<I==0>{});  }
+
+  protected:
+    T               value;
+    Tuple<Ts...>    values;
+
+  private:
+    template<uint I> T&                 at_dispatch(TBool<true>)                 { return value; }
+    template<uint I> constexpr const T& at_dispatch(TBool<true>) const noexcept  { return value; }
+
+    template<uint I> auto&              at_dispatch(TBool<false>)                { return values.template at<I-1>(); }
+    template<uint I> constexpr auto&    at_dispatch(TBool<false>)const noexcept  { return values.template at<I-1>(); }
+};
+
+template<class ...T>
+constexpr Tuple<const T&...> makeTuple(const T& ...t) {
+    return { t... };
+}
+
 /* --- array        --- */
 struct Section
 {
@@ -241,6 +311,20 @@ template<class T> struct  ArrayView
     size_t      size_   = 0;
 };
 
+
+/* --- exception    --- */
+struct IStringBuffer;
+struct FormatSpec;
+
+class IException
+{
+  public:
+    IException()         {}
+    virtual ~IException(){}
+    virtual void sformat(IStringBuffer& buffer, const FormatSpec& spec) const {}
+};
+
+
 /* --- no assign    --- */
 class INoassignable
 {
@@ -262,7 +346,7 @@ class INocopyable: protected INoassignable
     INocopyable(const INocopyable&) = delete;
 };
 
-/* --- singleton --- */
+/* --- singleton    --- */
 
 /*!
  * class Type: Singleton {
@@ -296,18 +380,6 @@ private:
 
     template<class T>
     static void destroy(T* ptr) { ptr->~T(); }
-};
-
-
-/* --- exception --- */
-struct IStringBuffer;
-
-class IException
-{
-  public:
-    IException()         {}
-    virtual ~IException(){}
-    virtual void sformat(IStringBuffer& buffer) const {}
 };
 
 }

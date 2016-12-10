@@ -17,13 +17,10 @@
 namespace lumpy
 {
 
-namespace external
+inline namespace builtin
 {
 
-namespace windows
-{
-
-#ifdef _WIN32
+#ifdef _LUMPY_CC_MSVC_
 inline uint32_t __builtin_clz(uint32_t x) {
     unsigned long r = 0;
     _BitScanReverse(&r, x);
@@ -36,8 +33,6 @@ inline uint32_t __builtin_clzll(uint64_t x) {
     return 63 - r;
 }
 #endif
-
-}
 
 }
 

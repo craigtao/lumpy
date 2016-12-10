@@ -12,35 +12,7 @@
  * You shold have received a copy of the GNU General Public License alone with the program.
  * If not, see <http://www.gnu.org/licenses/>
  */
-#include <lumpy/core/exception.h>
-#include <lumpy/core/format.h>
-namespace lumpy
-{
+#pragma once
 
-inline namespace core
-{
-
-cstring traceStack()
-{
-    return nullptr;
-}
-
-cstring ESystem::errorDesc(ESystem::ErrId id)
-{
-#ifdef _WIN32
-    static char buff[64];
-    strerror_s(buff, id);
-    return buff;
-#else
-    const auto str = strerror(id);
-    return str;
-#endif
-}
-
-void ESystem::sformat(IStringBuffer& buffer, const FormatSpec& spec) const {
-    buffer.formats("eid = {}, desc = {}", eid_, desc());
-}
-
-}
-
-}
+#include <lumpy/ptree/ptree.h>
+#include <lumpy/ptree/json.h>

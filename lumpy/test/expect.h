@@ -30,7 +30,7 @@ public:
         : a_(a), b_(b), op_(op)
     {}
 
-    void sformat(IStringBuffer& buffer) const override {
+    void sformat(IStringBuffer& buffer, const FormatSpec& spec={}) const override {
         buffer.formats("excepct '{} {} {}' failed", a_, op_, b_);
     }
 protected:

@@ -13,9 +13,7 @@
  * If not, see <http://www.gnu.org/licenses/>
  */
 #pragma once
-
 #include <lumpy/core/type.h>
-#include <lumpy/core/string.h>
 
 namespace lumpy
 {
@@ -34,10 +32,7 @@ public:
 
     ErrId   id()    const noexcept { return eid_;               }
     cstring desc()  const noexcept { return errorDesc(eid_);    }
-
-    void sformat(IStringBuffer& buffer) const override {
-        buffer.formats("eid = {}, desc = {}", eid_, desc());
-    }
+    void sformat(IStringBuffer& buffer, const FormatSpec& spec) const override;
 
 protected:
     ErrId   eid_ = 0;
@@ -64,7 +59,7 @@ public:
         : value(value), begin(begin), end(end)
     {}
 
-    void sformat(IStringBuffer& buffer) const override {
+    void sformat(IStringBuffer& buffer, const FormatSpec& spec) const override {
         sformats(buffer, "value = {}, range = [{} {})", value, begin, end);
     }
 };

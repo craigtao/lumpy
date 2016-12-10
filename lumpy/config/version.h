@@ -28,6 +28,10 @@ namespace  external
 #   undef unix
 #endif
 
+#if !defined(NDEBUG) && !defined(_DEBUG)
+#   define _DEBUG
+#endif
+
 namespace windows   {}
 namespace linux     {}
 namespace macos     {}

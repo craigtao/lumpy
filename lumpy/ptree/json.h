@@ -19,8 +19,7 @@
 namespace lumpy
 {
 
-namespace ptree
-{
+namespace json {
 
 enum class JType: uint16_t {
     /* basic */
@@ -42,7 +41,7 @@ class EJParseFailed : public IException
 public:
     EJParseFailed(cstring s, uint pos): str_(s), pos_(pos) {}
 
-    void sformat(IStringBuffer& buffer) const override {
+    void sformat(IStringBuffer& buffer, const FormatSpec& spec) const override {
         auto beg = pos_ > 10 ? pos_-10 : 0;
         buffer.formats(" ...'{}'...", string(str_+beg, pos_-beg));
     }
@@ -56,12 +55,12 @@ struct JNode
     constexpr JNode(JType type)               : type(type)            {}
     constexpr JNode(JType type, uint16_t size): type(type), size(size){}
 
-    const JNode* next() const { return right == 0 ? nullptr : this+right; }
-    JNode*       next()       { return right == 0 ? nullptr : this+right; }
+    const JNode* next() const { return next_ == 0 ? nullptr : this+next_; }
+    JNode*       next()       { return next_ == 0 ? nullptr : this+next_; }
 
-    JType       type    = JType::Null;
-    uint16_t    size    = 0;
-    int32_t     right   = 0;
+    JType       type   = JType::Null;
+    uint16_t    size   = 0;
+    int32_t     next_  = 0;
 };
 struct JNull:   JNode { JNull():    JNode{ JType::Null  } {}};
 struct JTrue:   JNode { JTrue():    JNode{ JType::True  } {}};
@@ -82,6 +81,8 @@ struct JKeyVal: JNode {
     cstring string;
 };
 
+void sformat(IStringBuffer& buffer, const JNode& node, const FormatSpec& spec);
+
 class  JDoc: Buffer<JNode>
 {
   public:
@@ -90,10 +91,10 @@ class  JDoc: Buffer<JNode>
     }
 
     template<class T>
-    JNode& add_item(JNode* proot, JNode* pleft, const T& item) {
+    JNode& add_item(JNode* proot, JNode* pprev, const T& item) {
         auto pnode = this->push(&item, sizeof(T)/sizeof(JNode));
         if (proot!=nullptr) proot->size  ++;
-        if (pleft!=nullptr) pleft->right = int32_t(pnode-pleft);
+        if (pprev!=nullptr) pprev->next_ = int32_t(pnode-pprev);
         return *pnode;
     }
 
@@ -104,10 +105,70 @@ class  JDoc: Buffer<JNode>
     void parse(cstring str, size_t size);
 };
 
-void sformat(IStringBuffer& buffer, const JNode& node, const FormatSpec& spec);
+class JTree: Buffer<JNode>
+{
+  public:
+    JTree(): Buffer<JNode>(4096){}
+
+    void beginArray() {
+        auto& node  = pushNode(JArray{});
+        ++level;
+        root[level] = &node;
+        prev[level] = &node;
+    }
+
+    void beginObject() {
+        auto& node  = pushNode(JObject{});
+        ++level;
+        root[level] = &node;
+        prev[level] = &node;
+    }
+
+    void end() {
+        --level;
+    }
+
+    void key(cstring key) {
+        pushNode(JKeyVal{key, uint16_t(strlen(key))});
+        isVal = true;
+    }
+
+    template<class T>
+    void val(T value, If<isReal<T>>* = nullptr) {
+        pushNode(JNumber{double(value)});
+    }
+
+    const JNode& value() { return this->data_[0]; }
+  private:
+    JNode*  root[16];
+    JNode*  prev[16];
+    int     level  = -1;
+    bool    isVal  = false;
+
+    template<class T>
+    JNode& pushNode(const T& node) {
+        auto next = this->push(&node, sizeof(T)/sizeof(JNode));
+        if (level>=0 && !isVal) {
+            root[level]->size++;
+            prev[level]->next_  = int32_t(next-prev[level]);
+            prev[level]         = next;
+        }
+        isVal = false;
+        return *next;
+    }
+};
+
+template<class T>
+JTree serialize(T& value) {
+    auto proxy = value.ptree();
+
+    JTree json;
+    proxy.visit(json);
+    return json;
+}
 
 }
 
-using ptree::JDoc;
+using json::JDoc;
 
-}
+}  // lumpy

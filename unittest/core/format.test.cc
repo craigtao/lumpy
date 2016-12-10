@@ -8,7 +8,7 @@ namespace lumpy
 inline namespace core
 {
 
-lumpy_unit(string)
+lumpy_unit(format)
 {
     lumpy_test(format_int)
     {

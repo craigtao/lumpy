@@ -49,95 +49,95 @@ template<class T> void msync  (T* data, size_t size)                { return _ms
 
 class EBufferOverflow: public IException
 {
- public:
-  EBufferOverflow(size_t size, size_t capicity, size_t extent);
-  void sformat(IStringBuffer& buffer) const override;
-
- protected:
-  size_t  size_;
-  size_t  capicity_;
-  size_t  extent_;
+  public:
+    EBufferOverflow(size_t size, size_t capicity, size_t extent);
+    void sformat(IStringBuffer& buffer, const FormatSpec& spec) const override;
+    void sformat(IStringBuffer& buffer) const;
+  protected:
+    size_t  size_;
+    size_t  capicity_;
+    size_t  extent_;
 };
 
 
 template<class Type>
 struct IBuffer: ArrayView<Type>
 {
- public:
-  using base   = ArrayView<Type>;
-  static constexpr auto default_capicity = 4*4096;//std::numeric_limits<uint>::max();
+  public:
+    using base   = ArrayView<Type>;
+    static constexpr auto default_capicity = 4*4096;//std::numeric_limits<uint>::max();
 
-  IBuffer(Type* ptr, size_t capicity): base(ptr, 0), capicity_(capicity) {}
-  ~IBuffer()   = default;
+    IBuffer(Type* ptr, size_t capicity): base(ptr, 0), capicity_(capicity) {}
+    ~IBuffer()   = default;
 
-  constexpr auto  capicity() const noexcept { return capicity_; }
+    constexpr auto  capicity() const noexcept { return capicity_; }
 
-  void clear() {
-    base::size_ = 0;
-  }
-
-  Type* grow(size_t size) noexcept {
-    auto result = base::data_ + base::size_;
-    base::size_ += size;
-    return result;
-  }
-
-  Type* push(const Type* src, size_t count) {
-    if (base::size_+count >= capicity_) throw(EBufferOverflow(base::size_, capicity_, count));
-
-    auto dst = grow(count);
-    mcpy(dst, src, count);
-    return dst;
-  }
-
-  Type* push(const Type& value, size_t count) {
-    if (base::size_+count >= capicity_) throw(EBufferOverflow(base::size_, capicity_, count));
-
-    auto dst = grow(count);
-    for (size_t i = 0; i < count; ++i) {
-      dst[i] = value;
+    void clear() {
+        base::size_ = 0;
     }
-    return dst;
-  }
 
-  template<uint N> Type* push(const Type(&data)[N]) {
-    return push(data, N);
-  }
+    Type* grow(size_t size) noexcept {
+        auto result = base::data_ + base::size_;
+        base::size_ += size;
+        return result;
+    }
 
-  Type& push(const Type& value) {
-    return *push(value, 1);
-  }
+    Type* push(const Type* src, size_t count) {
+        if (base::size_+count >= capicity_) throw(EBufferOverflow(base::size_, capicity_, count));
 
- protected:
-  std::size_t  capicity_ = 0;
+        auto dst = grow(count);
+        mcpy(dst, src, count);
+        return dst;
+    }
+
+    Type* push(const Type& value, size_t count) {
+        if (base::size_+count >= capicity_) throw(EBufferOverflow(base::size_, capicity_, count));
+
+        auto dst = grow(count);
+        for (size_t i = 0; i < count; ++i) {
+            dst[i] = value;
+        }
+        return dst;
+    }
+
+    template<uint N> Type* push(const Type(&data)[N]) {
+        return push(data, N);
+    }
+
+    Type& push(const Type& value) {
+        return *push(value, 1);
+    }
+
+  protected:
+    std::size_t  capicity_ = 0;
 };
 
 
 template<class Type>
 class Buffer: public IBuffer<Type>, INocopyable
 {
- public:
-  using base = IBuffer<Type>;
+  public:
+    using base = IBuffer<Type>;
 
-  Buffer(size_t size) : base(mnew<Type>(size), size) {}
+    Buffer(size_t size) : base(mnew<Type>(size), size) {}
 
-  ~Buffer() {
-    if (base::data_ != nullptr) mdel(base::data_);
-  }
+    ~Buffer() {
+        if (base::data_ != nullptr) mdel(base::data_);
+    }
 
-  Buffer(Buffer&& rhs) noexcept: base(rhs) {
-    rhs.data_       = nullptr;
-    rhs.size_       = 0;
-    rhs.capicity_   = 0;
-  }
+    Buffer(Buffer&& rhs) noexcept: base(rhs) {
+        rhs.data_       = nullptr;
+        rhs.size_       = 0;
+        rhs.capicity_   = 0;
+    }
 
-  Buffer& operator=(Buffer&& rhs) noexcept {
-    base::operator=(rhs);
-    rhs.data_       = 0;
-    rhs.size_       = 0;
-    rhs.capicity_   = 0;
-    return *this;
-  }
+    Buffer& operator=(Buffer&& rhs) noexcept {
+        base::operator=(rhs);
+        rhs.data_       = 0;
+        rhs.size_       = 0;
+        rhs.capicity_   = 0;
+        return *this;
+    }
 };
 
 }
