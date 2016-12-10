@@ -41,8 +41,11 @@ template<class T> auto proxy(const T& value) -> decltype(value.ptree()) { return
 template<class T> PNode<T&>       proxy(T&       value, If<isReal<T>>* = nullptr) { return {value}; }
 template<class T> PNode<const T&> proxy(const T& value, If<isReal<T>>* = nullptr) { return {value}; }
 
-inline PNode<string&>        proxy(string&  	 value) { return {value}; }
-inline PNode<const string&>  proxy(const string& value) { return {value}; }
+inline PNode<bool&>         proxy(bool&         value) { return {value}; }
+inline PNode<const bool&>   proxy(const bool&   value) { return {value}; }
+
+inline PNode<string&>       proxy(string&       value) { return {value}; }
+inline PNode<const string&> proxy(const string& value) { return {value}; }
 
 template<class T>
 struct PArray
