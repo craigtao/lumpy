@@ -64,7 +64,7 @@ static StringView parse_string(cstring &s, cstring e) {
                 if (c=='"')    break;
                 if (c=='\\')   {
                     c = *++s;
-                    if (c<' ') parse_failed(s);
+                    if (c<=' ') parse_failed(s);
                 }
             }
             else {
