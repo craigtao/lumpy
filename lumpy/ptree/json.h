@@ -235,14 +235,13 @@ struct ITree
         }
     };
 
-    ArrayItr    array() const   { return { node_          }; }
-    ArrayItr    array()         { return { buffer_, node_ }; }
+    ArrayItr    array() const   { return { node_         }; }
+    ArrayItr    array()         { return { buffer_, node_}; }
+    ObjectItr   object() const  { return { node_         }; }
+    ObjectItr   object()        { return { buffer_, node_}; }
 
-    ObjectItr  object() const   { return { node_          }; }
-    ObjectItr  object()         { return { buffer_, node_ }; }
-
-    auto        size()  const   { return node_->size();    }
-    operator    bool()  const   { return node_!=nullptr;   }
+    auto        size()  const   { return node_->size();     }
+    operator    bool()  const   { return node_!=nullptr;    }
 
   protected:
     IBuffer<JNode>* buffer_;
@@ -252,14 +251,14 @@ struct ITree
 
 class EJParseFailed : public IException
 {
-public:
+  public:
     EJParseFailed(cstring s, uint pos): str_(s), pos_(pos) {}
 
     void sformat(IStringBuffer& buffer, const FormatSpec& spec) const override {
         auto beg = pos_ > 10 ? pos_-10 : 0;
         buffer.formats(" ...'{}'...", string(str_+beg, pos_-beg));
     }
-protected:
+  protected:
     cstring str_;
     uint    pos_;
 };

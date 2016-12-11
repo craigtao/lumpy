@@ -71,7 +71,7 @@ static StringView parse_string(cstring &s, cstring e) {
                 parse_failed(s);
             }
         }
-        else {  // unicode
+        else {  // utf-8 support
             if (c== 0b11000000){ s+=1;}
             if (c== 0b11100000){ s+=2;}
             if (c== 0b11110000){ s+=3;}
@@ -178,7 +178,7 @@ static JNode& parse_any(cstring &s, cstring e, JTree& json, JNode* proot, JNode*
             auto v = parse_number(s, e);
             return json.add_item(proot, pleft, JNumber{ v });
         }
-        default:    { parse_failed(s); return *proot;                 }
+        default:    { parse_failed(s); return *proot;   }
     }
 }
 
