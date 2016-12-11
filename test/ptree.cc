@@ -3,17 +3,20 @@
 #include <lumpy/ptree.h>
 
 using namespace lumpy;
-struct MyClass
+
+struct Inter
 {
     double  dval;
     int     ints[3];
+
     auto ptree() { return toPTree($["dval"]=dval,$["ints"]=ints);}
 };
 
-struct MyClass2
+struct Outer
 {
-    MyClass a;
-    MyClass b;
+    Inter a;
+    Inter b;
+
     auto ptree() { return toPTree($["a"]=a,$["b"]=b);}
 };
 
@@ -29,7 +32,7 @@ int main(int argc, char *argv[]) {
         }
     })";
 
-    MyClass2 obj;
+    Outer obj;
 
     // str -> json
     JTree json(str, sizeof(str)-1);

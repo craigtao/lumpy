@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < 5; ++i) {
         Timer t;
         JTree json(str, size);
-        printf("lumpyjson use:  %f\n", t.duration());
+        printf("lumpyjson use:  %fms\n", t.duration());
     }
 
     // rapidjson
@@ -57,10 +57,10 @@ int main(int argc, char *argv[]) {
         Timer t;
         rapidjson::Document doc;
         doc.Parse(str);
-        printf("rapidjson use:  %f\n", t.duration());
+        printf("rapidjson use:  %fms\n", t.duration());
     }
 
-    printf("lumpyjson dump: %f\n", lumpyjson_dump);
-    printf("rapidjson dump: %f\n", rapidjson_dump);
+    printf("lumpyjson dump: %fms\n", lumpyjson_dump);
+    printf("rapidjson dump: %fms\n", rapidjson_dump);
     return 0;
 }
