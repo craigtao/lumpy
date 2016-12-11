@@ -2,7 +2,7 @@
 #include <iostream>
 #include <lumpy/core.h>
 #include <lumpy/io.h>
-#include <lumpy/json.h>
+#include <lumpy/ptree.h>
 
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -12,7 +12,7 @@ using namespace lumpy;
 
 int main(int argc, char *argv[]) {
 
-    File twitter(".data/json/twitter.json", File::Read);
+    File twitter("data/json/twitter.json", File::Read);
     const auto size = twitter.size();
     auto str = new char[size+1];
     twitter.read(str, size);
@@ -25,13 +25,13 @@ int main(int argc, char *argv[]) {
     // lumpy
     {
         Timer t;
-        JDoc json(str, size);
+        JTree json(str, size);
         writef("twitter = {}\n", json.value());
         lumpyjson_dump = t.duration();
 
     }
 
-    // rapidjson
+// rapidjson
     {
         Timer t;
         rapidjson::Document doc;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     // lumpy
     for (int i = 0; i < 5; ++i) {
         Timer t;
-        JDoc json(str, size);
+        JTree json(str, size);
         printf("lumpyjson use:  %f\n", t.duration());
     }
 

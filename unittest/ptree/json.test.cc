@@ -62,7 +62,7 @@ lumpy_unit(json) {
 
         for (int i = 0; i < 2; ++i) {
             Timer t;
-            JDoc json(str, size);
+            JTree json(str, size);
             printf("lumpycc json use: %f\n", t.duration());
         }
     }

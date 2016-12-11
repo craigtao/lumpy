@@ -34,29 +34,22 @@ struct StringView
     uint16_t    size;
 };
 
-static void parse_failed(cstring s) {
+static inline void parse_failed(cstring s) {
     throw s;
 }
 
 static char peek_char(cstring &s, cstring e) {
     while (s<e && isspace(*s)) { ++s; }
-
     if (s>=e) parse_failed(s);
     return *s;
 }
 
-template<uint S> void parse_keyword(const char(&expect)[S], cstring& str, cstring end) {
+// true, false, null
+template<uint S> void parse_keyword(const char(&k)[S], cstring& s, cstring e) {
     constexpr auto N = S-1;
-
-    if (N>0 && expect[0] != str[0]) parse_failed(str+0);
-    if (N>1 && expect[1] != str[1]) parse_failed(str+1);
-    if (N>2 && expect[2] != str[2]) parse_failed(str+2);
-    if (N>3 && expect[3] != str[3]) parse_failed(str+3);
-    if (N>4 && expect[4] != str[4]) parse_failed(str+4);
-    
-    if (end-str < N)                parse_failed(str+N);
-    if (!isdelim(str[N]))           parse_failed(str+N);
-    str += N;
+    if (N==4 && *reinterpret_cast<const uint32_t*>(s+0) != *reinterpret_cast<const uint32_t*>(k+0)) { parse_failed(s);}
+    if (N==5 && *reinterpret_cast<const uint32_t*>(s+1) != *reinterpret_cast<const uint32_t*>(k+1)) { parse_failed(s);}
+    s += N;
 }
 
 static StringView parse_string(cstring &s, cstring e) {
@@ -65,21 +58,28 @@ static StringView parse_string(cstring &s, cstring e) {
     //  p--------->s
     auto p = s + 1;
     while (++s < e) {
-        if (*s == '"')  break;
-        if (*s == '\t' || *s == '\n' || *s == '\r') { parse_failed(s); }
-        if (*s == '\\') {
-            auto t = s[1];
-            if(isspace(t))  { parse_failed(s); }
-            else            { ++s; }
+        auto c = ubyte(*s);
+        if (c<=0x7F) {
+            if (*s>=' ') {
+                if (c=='"')    break;
+                if (c=='\\')   {
+                    c = *++s;
+                    if (c<' ') parse_failed(s);
+                }
+            }
+            else {
+                parse_failed(s);
+            }
         }
-        if (ubyte(*s)== 0b11000000){ s+=1;}  // utf-8
-        if (ubyte(*s)== 0b11100000){ s+=2;}  // utf-8
-        if (ubyte(*s)== 0b11110000){ s+=3;}  // utf-8
-        if (ubyte(*s)== 0b11111000){ s+=4;}  // utf-8
-        if (ubyte(*s)== 0b11111100){ s+=5;}  // utf-8
+        else {  // unicode
+            if (c== 0b11000000){ s+=1;}
+            if (c== 0b11100000){ s+=2;}
+            if (c== 0b11110000){ s+=3;}
+            if (c== 0b11111000){ s+=4;}
+            if (c== 0b11111100){ s+=5;}
+        }
     }
     ++s;
-
     return{ p, uint16_t(s - p - 1) };
 }
 

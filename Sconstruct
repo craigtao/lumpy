@@ -9,7 +9,7 @@ env = Environment(
 config		= ARGUMENTS.get('config')
 
 if (config == 'release'):
-    env.Append(CCFLAGS = '-O2 -DNDEBUG')
+    env.Append(CCFLAGS = '-O3 -DNDEBUG')
 else:
     env.Append(CCFLAGS = '-g -O0')
 
