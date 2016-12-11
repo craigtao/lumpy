@@ -86,12 +86,13 @@ struct JString: JNode {
 struct JKeyVal: JNode {
     JKeyVal(cstring key, uint16_t size): JNode{ JType::KeyVal, size}, key_(key) {}
 
-    cstring         key()   const   { return key_;      }
-    const JNode&    value() const   { return *(this+1); }
-    JNode&          value()         { return *(this+1); }
+    cstring         key()   const       { return key_;      }
+    const JNode&    value() const       { return *(this+1); }
+    JNode&          value()             { return *(this+1); }
 
-    const JKeyVal*  next() const    { return static_cast<const JKeyVal*>(JNode::next());    }
-    JKeyVal*        next()          { return static_cast<JKeyVal*>(JNode::next());          }
+    const JKeyVal*  next() const        { return static_cast<const JKeyVal*>(JNode::next());    }
+    JKeyVal*        next()              { return static_cast<JKeyVal*>(JNode::next());          }
+    void            next(JKeyVal* node) { next_ = 2*(node-this);                                }
 
   protected:
     cstring key_;
@@ -126,100 +127,128 @@ struct ITree
         node->value(double(value));
     }
 
-    ArrayTree   array() const;
-    ArrayTree   array();
+    struct ArrayItr
+    {
+      public:
+        ArrayItr(const JNode* root)
+                : root_((JArray*)root)
+        {
+            if (root_->type() != JType::Array)  throw EUnexpect{};
+        }
 
-    ObjectTree  object() const;
-    ObjectTree  object();
+        ArrayItr(IBuffer<JNode>* buffer, JNode* root)
+                : buffer_(buffer),  root_((JArray*)root)
+        {
+            if (root_->type() == JType::Null)   root_->type(JType::Array);
+            if (root_->type() != JType::Array)  throw EUnexpect{};
+        }
 
-    auto        size() const { return node_->size(); }
+        ArrayItr& operator++() {
+            addItem(JNull{});
+            return *this;
+        }
+
+        const ArrayItr& operator++() const {
+            if (node_ == nullptr)   node_ = root_+1;
+            else                    node_ = node_->next();
+            return *this;
+        }
+
+        ITree   operator*()         { return {buffer_, root_, node_}; }
+        ITree   operator*() const   { return {buffer_, root_, node_}; }
+
+      protected:
+        IBuffer<JNode>* buffer_ = nullptr;
+        JArray*         root_   = nullptr;
+        mutable JNode*  node_   = nullptr;
+
+        void checkType() {
+            if (node_->type() != JType::Array){ throw EUnexpect{};}
+        }
+
+        template<class Json>
+        JNode* addItem(const Json& value) {
+            root_->size(+1);
+            JNode* node  = &(buffer_->push(value));
+            if (node_!=nullptr) node_ ->next(node);
+
+            node_ = node;
+            return node_;
+        }
+    };
+
+    struct ObjectItr
+    {
+      public:
+        ObjectItr(IBuffer<JNode>* buffer, JNode* root): buffer_(buffer),  root_((JObject*)root) {
+            if (root_->type() == JType::Null)   root_->type(JType::Object);
+            if (root_->type() != JType::Object) throw EUnexpect{};
+        }
+
+        ObjectItr(const JNode* root) : buffer_(nullptr), root_((JObject*)(root)) {
+            if (root_->type() != JType::Object) throw EUnexpect{};
+        }
+
+        ObjectItr& operator[](cstring str) {
+            addItem(str, ::strlen(str), JNull{});
+            return *this;
+        }
+
+        const ObjectItr& operator[](cstring str) const {
+            if (node_ == nullptr)   node_ = reinterpret_cast<JKeyVal*>(root_+1);
+            else                    node_ = node_->next();
+            if (match(str)) return *this;
+
+            node_ = reinterpret_cast<JKeyVal*>(root_+1);
+            for(uint i = 0; i < root_->size(); ++i, node_ = node_->next()) {
+                if (match(str)) return *this;
+            }
+            node_ = nullptr;
+            return *this;
+        }
+
+        ITree   operator*()         { return {buffer_, root_, &(node_->value()) }; }
+        ITree   operator*() const   { return {buffer_, root_, &(node_->value()) }; }
+
+        operator bool() const       { return node_ != nullptr; }
+
+      protected:
+        IBuffer<JNode>* buffer_ = nullptr;
+        JObject*        root_   = nullptr;
+        mutable JKeyVal*node_   = nullptr;
+
+        template<class Json>
+        JNode* addItem(cstring id, uint size, const Json& val) {
+            root_->size(+1);
+            auto node = &(buffer_->push(JKeyVal{id, uint16_t(size)}));
+            if (node_!=nullptr) node_ ->next(node);
+            node_ = node;
+
+            JNode* value = &(buffer_->push(val));
+            return value;
+        }
+
+        bool match(cstring str) const {
+            if (node_->type() != JType::KeyVal) throw EUnexpect{};
+            auto test = strncmp(node_->key(), str, node_->size());
+            return test == 0;
+        }
+    };
+
+    ArrayItr    array() const   { return { node_          }; }
+    ArrayItr    array()         { return { buffer_, node_ }; }
+
+    ObjectItr  object() const   { return { node_          }; }
+    ObjectItr  object()         { return { buffer_, node_ }; }
+
+    auto        size()  const   { return node_->size();    }
+    operator    bool()  const   { return node_!=nullptr;   }
 
   protected:
     IBuffer<JNode>* buffer_;
     JNode*          root_   = nullptr;
     JNode*          node_   = nullptr;
-
-    template<class Json>
-    JNode* addItem(const Json& value) {
-        if (root_!=nullptr) root_->size(1);
-        JNode* node  = &(buffer_->push(value));
-        node_ ->next(node);
-        node_ = node;
-        return node_;
-    }
-
-    template<class Json>
-    JNode* addItem(cstring key, uint size, const Json& value) {
-        addItem(JKeyVal{key, uint16_t(size)});
-        JNode* node = &(buffer_->push(value));
-        return node;
-    }
 };
-
-
-struct ArrayTree: ITree
-{
-    ITree operator[](uint idx) {
-        auto node = addItem(JNull{});
-        return {buffer_, root_, node};
-    }
-
-    ITree operator[](uint idx) const {
-        return {buffer_, root_, root_==node_ ? root_+1 : node_->next()};
-    }
-
-  private:
-    friend struct ITree;
-    ArrayTree(IBuffer<JNode>* buffer, JNode* root, JNode* node): ITree(buffer, root, node) {}
-};
-
-struct ObjectTree: ITree
-{
-    ITree operator[](cstring idx) {
-        auto node = addItem(idx, strlen(idx), JNull{});
-        return {buffer_, root_, node};
-    }
-
-    ITree operator[](cstring idx) const {
-        auto keynode = reinterpret_cast<JKeyVal*>(node_->next());
-        if (strncmp(keynode->key(), idx, keynode->size())==0) {
-            return { buffer_, root_, &(keynode->value())};
-        }
-        keynode = reinterpret_cast<JKeyVal*>(root_+1);
-        for(uint16_t i = 0; i < root_->size(); ++i, keynode=keynode->next()) {
-            if (strncmp(keynode->key(), idx, keynode->size())==0) {
-                return { buffer_, root_, &(keynode->value())};
-            }
-        }
-        return {buffer_, root_, nullptr};
-    }
-
-  private:
-    friend struct ITree;
-    ObjectTree(IBuffer<JNode>* buffer, JNode* root, JNode* node): ITree(buffer, root, node) {}
-};
-
-inline ArrayTree ITree::array() {
-    if (node_->type() == JType::Null) { node_->type(JType::Array);  }
-    if (node_->type() != JType::Array){ throw EUnexpect{};          }
-    return { buffer_, node_, node_};
-}
-
-inline ArrayTree ITree::array() const {
-    if (node_->type() != JType::Array){ throw EUnexpect{};          }
-    return { buffer_, node_, node_};
-}
-
-inline ObjectTree ITree::object() {
-    if (node_->type() == JType::Null)  { node_->type(JType::Object);}
-    if (node_->type() != JType::Object){ throw EUnexpect{};         }
-    return { buffer_, node_, node_};
-}
-
-inline ObjectTree ITree::object() const {
-    if (node_->type() != JType::Object){ throw EUnexpect{};         }
-    return { buffer_, node_, node_};
-}
 
 class EJParseFailed : public IException
 {

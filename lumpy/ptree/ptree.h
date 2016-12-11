@@ -59,18 +59,17 @@ struct PArray
     constexpr PArray(T* array, uint size): array_(array), size_(size) {}
 
     template<class V> void serialize(V&& v) const {
-        auto arr = v.array();
+        auto itr = v.array();
         for(uint i = 0; i < size_; ++i) {
-            proxy(array_[i]).serialize(arr[i]);
+            proxy(array_[i]).serialize(*++itr);
         }
     }
 
     template<class V> void deserialize(const V& v) const {
-        const auto arr = v.array();
+        const auto itr = v.array();
         if (size_ != v.size()) throw EBadSize{};
-
         for(size_t i = 0; i < size_; ++i) {
-            proxy(array_[i]).deserialize(arr[i]);
+            proxy(array_[i]).deserialize(*++itr);
         }
     }
 
@@ -94,26 +93,31 @@ struct PObject
     constexpr PObject(Arg<T> ...arg): keys_{arg.key...}, vals_{arg.val...} {}
 
     template<class V> void serialize(V&& v) const {
-        auto obj = v.object();
-        serialize_dispatch<0>(obj, TBool<true>{});
+        auto itr = v.object();
+        serialize_dispatch<0>(itr, TBool<true>{});
     }
 
     template<class V> void deserialize(const V& v) const {
-        const auto obj = v.object();
-        deserialize_dispatch<0>(obj, TBool<true>{});
+        const auto itr = v.object();
+        deserialize_dispatch<0>(itr, TBool<true>{});
     }
   protected:
     cstring     keys_[sizeof...(T)];
     Tuple<T...> vals_;
 
-    template<uint I, class V> void serialize_dispatch(V&& v, TBool<true>) const {
-        proxy(vals_.template at<I>()).serialize(v[keys_[I]]);
-        serialize_dispatch<I+1>(v, TBool<(I+1<size)>{});
+    template<uint I, class V> void serialize_dispatch(V& itr, TBool<true>) const {
+        auto key = keys_[I];
+        proxy(vals_.template at<I>()).serialize(*itr[key]);
+        serialize_dispatch<I+1>(itr, TBool<(I+1<size)>{});
     }
 
-    template<uint I, class V> void deserialize_dispatch(const V& v, TBool<true>) const {
-        proxy(vals_.template at<I>()).deserialize(v[keys_[I]]);
-        deserialize_dispatch<I+1>(v, TBool<(I+1<size)>{});
+    template<uint I, class V> void deserialize_dispatch(const V& itr, TBool<true>) const {
+        auto key = keys_[I];
+        auto u = itr[key];
+        if (u) {
+            proxy(vals_.template at<I>()).deserialize(*itr);
+            deserialize_dispatch<I+1>(itr, TBool<(I+1<size)>{});
+        }
     }
 
     template<uint I, class V> void serialize_dispatch  (V&& v, TBool<false>) const {}

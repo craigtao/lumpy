@@ -7,41 +7,41 @@ struct MyClass
 {
     double  dval;
     int     ints[3];
-
-    auto ptree() {
-        return toPTree(
-            $["dval"]=dval,
-            $["ints"]=ints);
-    }
+    auto ptree() { return toPTree($["dval"]=dval,$["ints"]=ints);}
 };
 
 struct MyClass2
 {
     MyClass a;
     MyClass b;
-
-    auto ptree() { 
-        return toPTree(
-            $["a"]=a,
-            $["b"]=b);
-    }
+    auto ptree() { return toPTree($["a"]=a,$["b"]=b);}
 };
 
 int main(int argc, char *argv[]) {
-    MyClass2 obj = {
-        { 12.34, { 1, 2, 3}},
-        { 33.44, { 5, 6, 7}}
-    };
+    const char str[] = R"({
+        "a": {
+            "dval": 12.34,
+            "ints": [ 1, 2, 3]
+        },
+        "b": {
+            "dval": 33.44,
+            "ints": [ 5, 6, 7]
+        }
+    })";
+
+    MyClass2 obj;
+
+    // str -> json
+    JTree json(str, sizeof(str)-1);
+
+    // json -> struct
+    deserialize(json, obj);
 
     // struct -> json
-    auto json = json::serialize(obj);
+    auto dom = json::serialize(obj);
 
     // json   -> string
-    writef("json = {}\n", json);
-
-    // json   -> struct
-    MyClass2 tmp;
-    json::deserialize(json, tmp);
+    writef("json = {}\n", dom);
 
     return 0;
 }
