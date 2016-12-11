@@ -19,7 +19,7 @@ lumpy_unit(json) {
             auto text = readAll(path.data());
 
             try {
-                JDoc json(text.c_str(), text.size());
+                JTree json(text.c_str(), text.size());
                 auto& value = json.value();
                 log_debug("json{:2s} = {}\n", i, value);
             }
@@ -42,7 +42,7 @@ lumpy_unit(json) {
 
             try {
                 auto text = readAll(path.data());
-                JDoc json(text.c_str(), text.size());
+                JTree json(text.c_str(), text.size());
                 log_error("json{:2s} = {}\n", i, json.value());
             }
             catch (json::EJParseFailed&) {

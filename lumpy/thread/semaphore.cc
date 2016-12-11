@@ -58,8 +58,12 @@ static bool sem_trywait(sem_t* sem) {
 namespace unix
 {
 static sem_t* sem_open(uint value) {
-    char name[] = "lumpy.thread.sem.XXXXXX";
-    mkstemp(name);
+    static int sem_index = 0;
+    static int pid       = int(getpid());
+    const char* fmt      = "lumpy.sem.%d:%d";
+    char name[32];
+    snprintf(name, sizeof(name), fmt, pid, sem_index++);
+
     auto sem = ::sem_open(name, O_CREAT, 0, value);
     if (sem == SEM_FAILED) {  throw ESystem(errno); }
     return sem;

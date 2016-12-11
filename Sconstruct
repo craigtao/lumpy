@@ -11,7 +11,7 @@ config		= ARGUMENTS.get('config')
 if (config == 'release'):
     env.Append(CCFLAGS = '-O2 -DNDEBUG')
 else:
-    env.Append(CCFLAGS = '-g')
+    env.Append(CCFLAGS = '-g -O0')
 
 env['ENV']['TERM'] = os.environ['TERM']
 

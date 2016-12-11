@@ -86,7 +86,9 @@ struct IBuffer: ArrayView<Type>
         if (base::size_+count >= capicity_) throw(EBufferOverflow(base::size_, capicity_, count));
 
         auto dst = grow(count);
-        mcpy(dst, src, count);
+        for (size_t i = 0; i < count; ++i) {
+            new(&dst[i]) Type(src[i]);
+        }
         return dst;
     }
 
@@ -95,7 +97,7 @@ struct IBuffer: ArrayView<Type>
 
         auto dst = grow(count);
         for (size_t i = 0; i < count; ++i) {
-            dst[i] = value;
+            new(&dst[i]) Type(value);
         }
         return dst;
     }
@@ -104,8 +106,16 @@ struct IBuffer: ArrayView<Type>
         return push(data, N);
     }
 
-    Type& push(const Type& value) {
-        return *push(value, 1);
+    template<class U>
+    auto& push(U&& value) {
+        using T = std::remove_const_t<std::remove_reference_t<U>>;
+        static_assert(sizeof(T)%sizeof(Type)==0, "bad align!!");
+
+        static constexpr const auto count = sizeof(T)/sizeof(Type);
+        if (base::size_+count >= capicity_) throw(EBufferOverflow(base::size_, capicity_, count));
+        auto dst = grow(count);
+        new(dst)T (std::forward<U>(value));
+        return *reinterpret_cast<T*>(dst);
     }
 
   protected:

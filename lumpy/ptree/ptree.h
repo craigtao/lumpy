@@ -28,8 +28,12 @@ struct PNode
 {
     constexpr PNode(T value): value_(value) {}
 
-    template<class V> void visit(V&& v) const {
-        v.val(value_);
+    template<class V> void serialize(V&& v) const {
+        v << value_;
+    }
+
+    template<class V> void deserialize(V&& v) const {
+        v >> value_;
     }
   protected:
     T   value_;
@@ -38,31 +42,41 @@ struct PNode
 template<class T> auto proxy(T&       value) -> decltype(value.ptree()) { return value.ptree(); }
 template<class T> auto proxy(const T& value) -> decltype(value.ptree()) { return value.ptree(); }
 
-template<class T> PNode<T&>       proxy(T&       value, If<isReal<T>>* = nullptr) { return {value}; }
-template<class T> PNode<const T&> proxy(const T& value, If<isReal<T>>* = nullptr) { return {value}; }
+template<class T> constexpr PNode<T&> 			 proxy(T&            value, If<isReal<T>>* = nullptr) { return {value}; }
+template<class T> constexpr PNode<T>  			 proxy(const T&      value, If<isReal<T>>* = nullptr) { return {value}; }
 
-inline PNode<bool&>         proxy(bool&         value) { return {value}; }
-inline PNode<const bool&>   proxy(const bool&   value) { return {value}; }
-
-inline PNode<string&>       proxy(string&       value) { return {value}; }
-inline PNode<const string&> proxy(const string& value) { return {value}; }
+inline            constexpr PNode<bool&>         proxy(bool&         value) { return {value}; }
+inline            constexpr PNode<bool>          proxy(const bool&   value) { return {value}; }
+inline            constexpr PNode<string&>       proxy(string&       value) { return {value}; }
+inline            constexpr PNode<const string&> proxy(const string& value) { return {value}; }
 
 template<class T>
 struct PArray
 {
   public:
+    class EBadSize{};
+
     constexpr PArray(T* array, uint size): array_(array), size_(size) {}
 
-    template<class V> void visit(V&& v) const {
-        v.beginArray();
-        for(size_t i = 0; i < size_; ++i) {
-            proxy(array_[i]).visit(std::forward<V>(v));
+    template<class V> void serialize(V&& v) const {
+        auto arr = v.array();
+        for(uint i = 0; i < size_; ++i) {
+            proxy(array_[i]).serialize(arr[i]);
         }
-        v.end();
     }
+
+    template<class V> void deserialize(const V& v) const {
+        const auto arr = v.array();
+        if (size_ != v.size()) throw EBadSize{};
+
+        for(size_t i = 0; i < size_; ++i) {
+            proxy(array_[i]).deserialize(arr[i]);
+        }
+    }
+
   protected:
-    T*      array_;
-    size_t  size_;
+    T*          array_;
+    const uint  size_;
 };
 
 template<class T>  PArray<      T> proxy(      T  array[], size_t size) { return { array, size}; }
@@ -79,23 +93,31 @@ struct PObject
 
     constexpr PObject(Arg<T> ...arg): keys_{arg.key...}, vals_{arg.val...} {}
 
-    template<class V> void visit(V&& v) const {
-        v.beginObject();
-        visit_dispatch<0>(std::forward<V>(v), TBool<true>{});
-        v.end();
-     }
+    template<class V> void serialize(V&& v) const {
+        auto obj = v.object();
+        serialize_dispatch<0>(obj, TBool<true>{});
+    }
+
+    template<class V> void deserialize(const V& v) const {
+        const auto obj = v.object();
+        deserialize_dispatch<0>(obj, TBool<true>{});
+    }
   protected:
     cstring     keys_[sizeof...(T)];
     Tuple<T...> vals_;
 
-    template<uint I, class V> void visit_dispatch(V&& v, TBool<true>) const {
-        v.key(keys_[I]);
-        proxy(vals_.template at<I>()).visit(v);
-        visit_dispatch<I+1>(std::forward<V>(v), TBool<(I+1<size)>{});
+    template<uint I, class V> void serialize_dispatch(V&& v, TBool<true>) const {
+        proxy(vals_.template at<I>()).serialize(v[keys_[I]]);
+        serialize_dispatch<I+1>(v, TBool<(I+1<size)>{});
     }
 
-    template<uint I, class V> void visit_dispatch(V&& v, TBool<false>) const {
+    template<uint I, class V> void deserialize_dispatch(const V& v, TBool<true>) const {
+        proxy(vals_.template at<I>()).deserialize(v[keys_[I]]);
+        deserialize_dispatch<I+1>(v, TBool<(I+1<size)>{});
     }
+
+    template<uint I, class V> void serialize_dispatch  (V&& v, TBool<false>) const {}
+    template<uint I, class V> void deserialize_dispatch(V&& v, TBool<false>) const {}
 };
 
 template<class T>    auto& proxy(      PNode<T>&      node) { return node; }

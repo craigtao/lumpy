@@ -28,27 +28,6 @@ static bool isdelim(char c) {
     return c == ',' || c == ':' || c == ']' || c == '}' || isspace(c) || !c;
 }
 
-static char peek_char(cstring &s, cstring e) {
-    while (s<e && isspace(*s)) { ++s; }
-
-    if (s>=e) throw s;
-    return *s;
-}
-
-template<uint S> void parse_keyword(const char(&expect)[S], cstring& str, cstring end) {
-    constexpr auto N = S-1;
-
-    if (N>0 && expect[0] != str[0]) throw (str+0);
-    if (N>1 && expect[1] != str[1]) throw (str+1);
-    if (N>2 && expect[2] != str[2]) throw (str+2);
-    if (N>3 && expect[3] != str[3]) throw (str+3);
-    if (N>4 && expect[4] != str[4]) throw (str+4);
-
-    if (end-str < N)        throw(str+N);
-    if (!isdelim(str[N]))   throw(str+N);
-    str += N;
-}
-
 struct StringView
 {
     cstring     str;
@@ -57,6 +36,27 @@ struct StringView
 
 static void parse_failed(cstring s) {
     throw s;
+}
+
+static char peek_char(cstring &s, cstring e) {
+    while (s<e && isspace(*s)) { ++s; }
+
+    if (s>=e) parse_failed(s);
+    return *s;
+}
+
+template<uint S> void parse_keyword(const char(&expect)[S], cstring& str, cstring end) {
+    constexpr auto N = S-1;
+
+    if (N>0 && expect[0] != str[0]) parse_failed(str+0);
+    if (N>1 && expect[1] != str[1]) parse_failed(str+1);
+    if (N>2 && expect[2] != str[2]) parse_failed(str+2);
+    if (N>3 && expect[3] != str[3]) parse_failed(str+3);
+    if (N>4 && expect[4] != str[4]) parse_failed(str+4);
+    
+    if (end-str < N)                parse_failed(str+N);
+    if (!isdelim(str[N]))           parse_failed(str+N);
+    str += N;
 }
 
 static StringView parse_string(cstring &s, cstring e) {
@@ -92,9 +92,9 @@ static double parse_number(cstring& s, cstring e) {
     return r;
 }
 
-static JNode& parse_any(cstring &s, cstring e,JDoc& json, JNode* root, JNode* pleft);
+static JNode& parse_any(cstring &s, cstring e,JTree& json, JNode* root, JNode* pleft);
 
-static JNode& parse_array(cstring& s, cstring e, JDoc& json, JNode* proot, JNode* pleft) {
+static JNode& parse_array(cstring& s, cstring e, JTree& json, JNode* proot, JNode* pleft) {
     auto    root = &json.add_item(proot, pleft, JArray{});
     JNode*  left = nullptr;
 
@@ -115,21 +115,21 @@ static JNode& parse_array(cstring& s, cstring e, JDoc& json, JNode* proot, JNode
         parse_failed(s);
     }
 
-    throw s;
+    parse_failed(s);
 }
 
-static JNode& parse_key(cstring& s, cstring e, JDoc& json, JNode* proot, JNode* pleft) {
+static JNode& parse_key(cstring& s, cstring e, JTree& json, JNode* proot, JNode* pleft) {
     if (peek_char(s, e) != '"') parse_failed(s);
 
     auto    key = parse_string(s, e);
-    if (pleft != nullptr && pleft->next_ != 0) {
+    if (pleft != nullptr && pleft->next() != 0) {
         parse_failed(s);
     }
     auto&   item = json.add_item(proot, pleft, JKeyVal{ key.str, key.size });
     return  item;
 }
 
-static JNode& parse_object(cstring& s, cstring e, JDoc& json, JNode* proot, JNode* pleft) {
+static JNode& parse_object(cstring& s, cstring e, JTree& json, JNode* proot, JNode* pleft) {
     auto    root = &json.add_item(proot, pleft, JObject{});
     JNode*  left = nullptr;
     ++s;
@@ -140,13 +140,13 @@ static JNode& parse_object(cstring& s, cstring e, JDoc& json, JNode* proot, JNod
     while (*s) {
         auto& key = parse_key(s, e, json, root, left);
         left = &key;
-        if (left != nullptr && left->next_ != 0) parse_failed(s);
+        if (left != nullptr && left->next() != 0) parse_failed(s);
 
         if (peek_char(s, e) != ':') parse_failed(s);
         ++s;
 
         auto& val = parse_any(s, e, json, nullptr, nullptr); (void)val;
-        if (left != nullptr && left->next_ != 0) {
+        if (left != nullptr && left->next() != 0) {
             parse_failed(s);
         }
 
@@ -159,8 +159,8 @@ static JNode& parse_object(cstring& s, cstring e, JDoc& json, JNode* proot, JNod
     throw s;
 }
 
-static JNode& parse_any(cstring &s, cstring e, JDoc& json, JNode* proot, JNode* pleft) {
-    if (pleft != nullptr && pleft->next_ != 0) {
+static JNode& parse_any(cstring &s, cstring e, JTree& json, JNode* proot, JNode* pleft) {
+    if (pleft != nullptr && pleft->next() != 0) {
         parse_failed(s);
     }
     // ignore space
@@ -182,7 +182,7 @@ static JNode& parse_any(cstring &s, cstring e, JDoc& json, JNode* proot, JNode* 
     }
 }
 
-void JDoc::parse(cstring s, size_t size) {
+void JTree::parse(cstring s, size_t size) {
     auto b  = s;
     auto e  = s+size;
 
@@ -202,7 +202,7 @@ void JDoc::parse(cstring s, size_t size) {
     }
 }
 
-void JDoc::staticInit() {
+void JTree::staticInit() {
     static_assert(sizeof(JNode)   == sizeof(JNull),   "bad json size");
     static_assert(sizeof(JNode)   == sizeof(JTrue),   "bad json size");
     static_assert(sizeof(JNode)   == sizeof(JFalse),  "bad json size");
@@ -221,27 +221,27 @@ void sindent(IStringBuffer& buffer ,uint level, bool indent) {
 void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, uint level, bool indent) {
     sindent(buffer, level, indent);
 
-    switch (head.type) {
+    switch (head.type()) {
         case JType::Null:  sformat(buffer, "null");        break;
         case JType::True:  sformat(buffer, "true");        break;
         case JType::False: sformat(buffer, "false");       break;
 
         case JType::Number: {
             auto* obj = reinterpret_cast<const JNumber*>(&head);
-            sformat(buffer, obj->value, spec);
+            sformat(buffer, obj->value(), spec);
             break;
         }
 
         case JType::String: {
             auto* obj = reinterpret_cast<const JString*>(&head);
             buffer.push('"');
-            buffer.push(obj->string, obj->size);
+            buffer.push(obj->value(), obj->size());
             buffer.push('"');
             break;
         }
 
         case JType::Array: {
-            if (head.size != 0) {
+            if (head.size() != 0) {
                 buffer.push("[\n");
                 auto item = &head + 1;
                 while (item != nullptr) {
@@ -261,7 +261,7 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
         }
 
         case JType::Object: {
-            if (head.size != 0) {
+            if (head.size() != 0) {
                 buffer.push("{\n");
                 auto item = &head + 1;
                 while (item != nullptr) {
@@ -270,7 +270,7 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
                     sindent(buffer, level+1, true);
 
                     buffer.push('"');
-                    buffer.push(key.string, key.size);
+                    buffer.push(key.key(), key.size());
                     buffer.push("\": ");
 
                     sformat(buffer, val, spec, level+1, false);
