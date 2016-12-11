@@ -8,16 +8,14 @@ struct Inter
 {
     double  dval;
     int     ints[3];
-
-    auto ptree() { return toPTree($["dval"]=dval,$["ints"]=ints);}
+    auto ptree() { return ($["dval"]=dval, $["ints"]=ints); }
 };
 
 struct Outer
 {
     Inter a;
     Inter b;
-
-    auto ptree() { return toPTree($["a"]=a,$["b"]=b);}
+    auto ptree() { return ($["a"]=a, $["b"]=b); }
 };
 
 int main(int argc, char *argv[]) {

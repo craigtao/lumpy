@@ -14,7 +14,7 @@
  */
 #pragma once
 
-#include <lumpy/core/type.h>
+#include <lumpy/core/immutable.h>
 
 namespace lumpy
 {

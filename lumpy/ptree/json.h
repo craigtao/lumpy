@@ -15,6 +15,7 @@
 #pragma once
 
 #include <lumpy/core.h>
+#include <lumpy/ptree/ptree.h>
 
 namespace lumpy
 {
@@ -251,14 +252,14 @@ struct ITree
 
 class EJParseFailed : public IException
 {
-  public:
+public:
     EJParseFailed(cstring s, uint pos): str_(s), pos_(pos) {}
 
     void sformat(IStringBuffer& buffer, const FormatSpec& spec) const override {
         auto beg = pos_ > 10 ? pos_-10 : 0;
         buffer.formats(" ...'{}'...", string(str_+beg, pos_-beg));
     }
-  protected:
+protected:
     cstring str_;
     uint    pos_;
 };
@@ -307,17 +308,17 @@ inline void sformat(IStringBuffer& buffer, const JTree& tree, const FormatSpec& 
 
 template<class T>
 JTree serialize(T& value, size_t size=4*1024*1024) {
-    JTree proxy(size);
-    auto   ptree = value.ptree();
-    ptree.serialize(proxy);
-    return proxy;
+    JTree  jproxy(size);
+    auto   oproxy = ptree::proxy(value);
+    oproxy.serialize(jproxy);
+    return jproxy;
 }
 
 template<class T>
 void deserialize(const JNode& json, T& value) {
-    ITree  proxy(nullptr, nullptr, const_cast<JNode*>(&json));
-    auto   ptree = value.ptree();
-    ptree.deserialize(proxy);
+    ITree  jproxy(nullptr, nullptr, const_cast<JNode*>(&json));
+    auto   oproxy = ptree::proxy(value);
+    oproxy.deserialize(jproxy);
 }
 
 template<class T>

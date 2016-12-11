@@ -14,8 +14,7 @@
  */
 #pragma once
 
-#include <lumpy/core/type.h>
-#include <lumpy/core/memory.h>
+#include <lumpy/core/tuple.h>
 #include <lumpy/core/string.h>
 
 namespace lumpy
@@ -71,7 +70,7 @@ inline void sformat(IStringBuffer& buffer, const IException& value, const Format
 /* --- parse fmt-spec --- */
 cstring _parseFormatSpec(IStringBuffer& buffer, cstring str, FormatSpec& spec);
 
-template<uint I, class ...T> auto& _getFormatArgs(const Tuple<T...>& argv, TBool<true>)  { return argv.template at<I>();                }
+template<uint I, class ...T> auto& _getFormatArgs(const Tuple<T...>& argv, TBool<true>)  { return *(argv.template at<I>());             }
 template<uint I, class ...T> auto& _getFormatArgs(const Tuple<T...>& argv, TBool<false >){ static null_t<> result; return result;       }
 template<uint I, class ...T> auto& _getFormatArgs(const Tuple<T...>& argv)  { return _getFormatArgs<I>(argv, TBool<(I<sizeof...(T))>{});}
 
@@ -83,7 +82,7 @@ void IStringBuffer::format(const T& value, const FormatSpec& spec) {
 
 template<class ...T>
 void IStringBuffer::formats(const string& fmt, const T&... args) {
-    auto    argv    = makeTuple(args...);
+    auto    argv    = makeTuple(&args...);
     cstring fmtstr  = fmt.c_str();
 
     for(FormatSpec spec={}; (fmtstr=_parseFormatSpec(*this, fmtstr, spec))!=nullptr; ++spec.id) {

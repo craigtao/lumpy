@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * lumpy is a common c++1z library, mayby the missing library for you.
  * Copyright (C) 2016 lumpy.zhu@gmail.com
  *
@@ -13,20 +13,15 @@
  * If not, see <http://www.gnu.org/licenses/>
  */
 #pragma once
-
-#include <lumpy/config.h>
-
 #include <lumpy/core/type.h>
-#include <lumpy/core/immutable.h>
-#include <lumpy/core/traits.h>
-#include <lumpy/core/tuple.h>
-#include <lumpy/core/vec.h>
-#include <lumpy/core/array.h>
-#include <lumpy/core/exception.h>
 
-#include <lumpy/core/memory.h>
-#include <lumpy/core/string.h>
-#include <lumpy/core/format.h>
+namespace lumpy
+{
 
-#include <lumpy/core/algorithm.h>
-#include <lumpy/core/datetime.h>
+inline namespace core
+{
+
+
+}
+
+}

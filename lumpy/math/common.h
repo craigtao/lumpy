@@ -23,6 +23,7 @@ inline namespace math
 
 using size_t    = index_t;
 
+
 /* --- stride --- */
 template<class Size, uint Rank, uint I> constexpr auto _toStride(const Size(&shape)[Rank], TIdx<I>, TBool<false>) { return Size(1);}
 template<class Size, uint Rank, uint I> constexpr auto _toStride(const Size(&shape)[Rank], TIdx<I>, TBool<true> ) { return shape[I]*_toStride(shape, TIdx<I-1>{}, TBool<(I>1)>{}); }

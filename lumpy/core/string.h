@@ -14,8 +14,7 @@
  */
 #pragma once
 
-#include <lumpy/core/type.h>
-#include <lumpy/core/traits.h>
+#include <lumpy/core/array.h>
 #include <lumpy/core/memory.h>
 
 namespace lumpy

@@ -23,6 +23,10 @@ namespace lumpy
 namespace ptree
 {
 
+template<class T>    struct PNode;
+template<class T>    struct PArray;
+template<class ...T> struct PObject;;
+
 template<class T>
 struct PNode
 {
@@ -39,8 +43,6 @@ struct PNode
     T   value_;
 };
 
-template<class T> auto proxy(T&       value) -> decltype(value.ptree()) { return value.ptree(); }
-template<class T> auto proxy(const T& value) -> decltype(value.ptree()) { return value.ptree(); }
 
 template<class T> constexpr PNode<T&> 			 proxy(T&            value, If<isReal<T>>* = nullptr) { return {value}; }
 template<class T> constexpr PNode<T>  			 proxy(const T&      value, If<isReal<T>>* = nullptr) { return {value}; }
@@ -49,6 +51,12 @@ inline            constexpr PNode<bool&>         proxy(bool&         value) { re
 inline            constexpr PNode<bool>          proxy(const bool&   value) { return {value}; }
 inline            constexpr PNode<string&>       proxy(string&       value) { return {value}; }
 inline            constexpr PNode<const string&> proxy(const string& value) { return {value}; }
+
+template<class ...T> PObject<T...> proxyTuple(const Tuple<T...>& tuple);
+
+template<class T> auto proxy(T&       value) -> decltype(proxyTuple(value.ptree())) { return proxyTuple(value.ptree()); }
+template<class T> auto proxy(const T& value) -> decltype(proxyTuple(value.ptree())) { return proxyTuple(value.ptree()); }
+
 
 template<class T>
 struct PArray
@@ -90,7 +98,7 @@ struct PObject
   public:
     constexpr static const auto size = sizeof...(T);
 
-    constexpr PObject(Arg<T> ...arg): keys_{arg.key...}, vals_{arg.val...} {}
+    constexpr PObject(const Tuple<T...>& tuple): tuple_(tuple) {}
 
     template<class V> void serialize(V&& v) const {
         auto itr = v.object();
@@ -102,20 +110,19 @@ struct PObject
         deserialize_dispatch<0>(itr, TBool<true>{});
     }
   protected:
-    cstring     keys_[sizeof...(T)];
-    Tuple<T...> vals_;
+    Tuple<T...> tuple_;
 
     template<uint I, class V> void serialize_dispatch(V& itr, TBool<true>) const {
-        auto key = keys_[I];
-        proxy(vals_.template at<I>()).serialize(*itr[key]);
+        auto item = tuple_.template at<I>();
+        proxy(item.value).serialize(*itr[item.name]);
         serialize_dispatch<I+1>(itr, TBool<(I+1<size)>{});
     }
 
     template<uint I, class V> void deserialize_dispatch(const V& itr, TBool<true>) const {
-        auto key = keys_[I];
-        auto u = itr[key];
+        auto item = tuple_.template at<I>();
+        auto u = itr[item.name];
         if (u) {
-            proxy(vals_.template at<I>()).deserialize(*itr);
+            proxy(item.value).deserialize(*itr);
             deserialize_dispatch<I+1>(itr, TBool<(I+1<size)>{});
         }
     }
@@ -131,18 +138,12 @@ template<class T>    auto& proxy(const PArray<T>&     arr)  { return arr;  }
 template<class ...T> auto& proxy(      PObject<T...>& obj)  { return obj;  }
 template<class ...T> auto& proxy(const PObject<T...>& obj)  { return obj;  }
 
-template<class T, class ...U>
-PObject<T,U...> proxy(Arg<T> arg, Arg<U> ...args) {
-    return {arg, args...};
-}
-
 template<class ...T>
-auto toPTree(T&& ...t) {
-    return proxy(std::forward<T>(t)...);
+PObject<T...> proxyTuple(const Tuple<T...>& tuple) {
+    auto item = tuple.template at<0>();
+    return {tuple};
 }
 
 }
-
-using ptree::toPTree;
 
 }
