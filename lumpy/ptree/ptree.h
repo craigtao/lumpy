@@ -43,20 +43,20 @@ struct PNode
     T   value_;
 };
 
+inline constexpr PNode<bool&>         proxy(bool&         value) { return{ value }; }
+inline constexpr PNode<bool>          proxy(const bool&   value) { return{ value }; }
+inline constexpr PNode<string&>       proxy(string&       value) { return{ value }; }
+inline constexpr PNode<const string&> proxy(const string& value) { return{ value }; }
 
-template<class T> constexpr PNode<T&> 			 proxy(T&            value, If<isReal<T>>* = nullptr) { return {value}; }
-template<class T> constexpr PNode<T>  			 proxy(const T&      value, If<isReal<T>>* = nullptr) { return {value}; }
 
-inline            constexpr PNode<bool&>         proxy(bool&         value) { return {value}; }
-inline            constexpr PNode<bool>          proxy(const bool&   value) { return {value}; }
-inline            constexpr PNode<string&>       proxy(string&       value) { return {value}; }
-inline            constexpr PNode<const string&> proxy(const string& value) { return {value}; }
+template<class T> constexpr PNode<T&>            proxy(T&            value, If<isReal<T>>* = nullptr) { return {value}; }
+template<class T> constexpr PNode<T>             proxy(const T&      value, If<isReal<T>>* = nullptr) { return {value}; }
 
 template<class ...T> PObject<T...> proxyTuple(const Tuple<T...>& tuple);
-
-template<class T> auto proxy(T&       value) -> decltype(proxyTuple(value.ptree())) { return proxyTuple(value.ptree()); }
-template<class T> auto proxy(const T& value) -> decltype(proxyTuple(value.ptree())) { return proxyTuple(value.ptree()); }
-
+template<class T> auto proxy(T&       value) -> decltype(proxyTuple(value.toPTree())) { return proxyTuple(value.toPTree()); }
+template<class T> auto proxy(const T& value) -> decltype(proxyTuple(value.toPTree())) { return proxyTuple(value.toPTree()); }
+template<class T> auto proxy(T&       value) -> decltype(proxyTuple(toPTree(value)))  { return proxyTuple(toPTree(value));  }
+template<class T> auto proxy(const T& value) -> decltype(proxyTuple(toPTree(value)))  { return proxyTuple(toPTree(value));  }
 
 template<class T>
 struct PArray
@@ -91,6 +91,38 @@ template<class T>  PArray<const T> proxy(const T  array[], size_t size) { return
 
 template<class T, size_t size> PArray<      T> proxy(      T (&array)[size]) { return { array, size}; }
 template<class T, size_t size> PArray<const T> proxy(const T (&array)[size]) { return { array, size}; }
+
+template<class T>
+struct PVector
+{
+public:
+    class EBadSize {};
+
+    constexpr PVector(T& array) : array_(array) {}
+
+    template<class V> void serialize(V&& v) const {
+        auto itr = v.array();
+        auto size = array_.size();
+        for (uint i = 0; i < uint(size); ++i) {
+            proxy(array_[i]).serialize(*++itr);
+        }
+    }
+
+    template<class V> void deserialize(const V& v) const {
+        const auto itr = v.array();
+        auto size = v.size();
+        array_.resize(v.size());
+        for (uint i = 0; i < uint(size); ++i) {
+            proxy(array_[i]).deserialize(*++itr);
+        }
+    }
+
+protected:
+    T&  array_;
+};
+
+template<class T> PVector<std::vector<T>> proxy(      std::vector<T>& vector) { return{ vector }; }
+template<class T> PVector<std::vector<T>> proxy(const std::vector<T>& vector) { return{ const_cast<std::vector<T>&>(vector) }; }
 
 template<class ...T>
 struct PObject

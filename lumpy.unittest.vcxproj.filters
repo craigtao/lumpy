@@ -40,4 +40,9 @@
       <Filter>ptree</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="unittest\ptree\ajson.h">
+      <Filter>ptree</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
