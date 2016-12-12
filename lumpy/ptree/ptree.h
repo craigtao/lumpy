@@ -140,7 +140,6 @@ template<class ...T> auto& proxy(const PObject<T...>& obj)  { return obj;  }
 
 template<class ...T>
 PObject<T...> proxyTuple(const Tuple<T...>& tuple) {
-    auto item = tuple.template at<0>();
     return {tuple};
 }
 
