@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="thread">
+      <UniqueIdentifier>{695ea7d3-1f84-451d-a8cf-385ea2aefc43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{0bdf662f-a3b5-4823-b40e-874f42c16f77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ptree">
+      <UniqueIdentifier>{400aa68b-afba-474c-b70e-4165c0edbdcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{8e5f819e-e762-405e-bc4b-e534c3a402a5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="unittest\core\format.test.cc">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="unittest\core\immutable.test.cc">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="unittest\core\vec.test.cc">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="unittest\thread\task.test.cc">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="unittest\math\array.test.cc">
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="unittest\ptree\json.test.cc">
+      <Filter>ptree</Filter>
+    </ClCompile>
+    <ClCompile Include="unittest\array_list.test.cc" />
+    <ClCompile Include="unittest\log.test.cc" />
+    <ClCompile Include="unittest\main.cc" />
+    <ClCompile Include="unittest\ptree\ptree.test.cc">
+      <Filter>ptree</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

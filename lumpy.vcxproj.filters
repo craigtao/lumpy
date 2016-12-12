@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="config">
+      <UniqueIdentifier>{1dd06fb9-cfb5-4f62-81e5-a6d14f238f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{ed9f8a9b-030f-4ec5-8729-f790cc2c0f73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{d5bd6bf9-8bf3-4422-b3b9-1fdf8484f9e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="log">
+      <UniqueIdentifier>{a4c2afa9-721d-4f29-9cd7-6395f54e641c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{bcdcb98a-c06e-4fa8-9168-20af25a06b99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ptree">
+      <UniqueIdentifier>{fbc5e5b4-2ed8-4923-b8b2-7d1fa86a01df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{77cb8441-55ff-4321-848d-5745e5b774c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread">
+      <UniqueIdentifier>{dcddbfe0-704a-4933-b45b-f4171842f57e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lumpy\config\build.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\config\cxxabi.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\config\intrin.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\config\version.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\algorithm.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\array.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\datetime.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\dollar.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\exception.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\format.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\immutable.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\memory.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\string.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\traits.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\tuple.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\type.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\core\vec.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\io\file.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\io\filesystem.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\log\common.h">
+      <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\log\logger.h">
+      <Filter>log</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\math\array.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\math\common.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\math\expr.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\math\run.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\math\slice.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\test\expect.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\test\unittest.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\ptree\json.h">
+      <Filter>ptree</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\ptree\ptree.h">
+      <Filter>ptree</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\thread\common.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\thread\semaphore.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\thread\task.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\thread\threadpool.h">
+      <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="lumpy\array_list.h" />
+    <ClInclude Include="lumpy\config.h" />
+    <ClInclude Include="lumpy\core.h" />
+    <ClInclude Include="lumpy\cuda.h" />
+    <ClInclude Include="lumpy\io.h" />
+    <ClInclude Include="lumpy\log.h" />
+    <ClInclude Include="lumpy\math.h" />
+    <ClInclude Include="lumpy\ptree.h" />
+    <ClInclude Include="lumpy\test.h" />
+    <ClInclude Include="lumpy\thread.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lumpy\config\cxxabi.cc">
+      <Filter>config</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\core\exception.cc">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\core\format.cc">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\core\memory.cc">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\io\file.cc">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\log\console_backend.cc">
+      <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\log\logger.cc">
+      <Filter>log</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\test\unittest.cc">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\ptree\json.cc">
+      <Filter>ptree</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\thread\semaphore.cc">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="lumpy\thread\task.cc">
+      <Filter>thread</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

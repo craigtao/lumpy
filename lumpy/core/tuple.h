@@ -119,8 +119,7 @@ struct ArgName
 
 template<class TA, uint NA, class TB, uint NB>
 constexpr auto operator,(const Arg<TA,NA>&a, const Arg<TB,NB>& b) {
-    auto tuple = makeTuple(a, b);
-    return tuple;
+    return makeTuple(a, b);
 }
 
 }

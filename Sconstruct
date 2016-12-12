@@ -1,19 +1,17 @@
 import os;
 
 env = Environment(
-    CXX		= 'clang++',
+    CXX         = 'clang++',
     CPPPATH     = ['.'],
-    CCFLAGS	= '-D_LUMPY_BUILD_ ',
+    CCFLAGS     = '-D_LUMPY_BUILD_ ',
     CXXFLAGS    = '--std=c++14 -Wall ')
 
-config		= ARGUMENTS.get('config')
+config          = ARGUMENTS.get('config')
 
 if (config == 'release'):
     env.Append(CCFLAGS = '-O3 -DNDEBUG')
 else:
     env.Append(CCFLAGS = '-g -O0')
-
-env['ENV']['TERM'] = os.environ['TERM']
 
 lumpy_libs      = []
 if env['PLATFORM'] == 'posix':  # linux
@@ -23,5 +21,5 @@ if env['PLATFORM'] == 'posix':  # linux
 lumpy_src       = [Glob('lumpy/*.cc'), Glob('lumpy/*/*.cc', exclude=('lumpy/cuda/*.cc'))]
 lumpy_lib       = env.Library('lib/lumpy', lumpy_src, LIBS=lumpy_libs)
 
-unittest_src	= [Glob('unittest/*.cc'), Glob('unittest/*/*.cc')]
-unittest_app	= env.Program('bin/lumpy.unittest', unittest_src, LIBS=lumpy_libs+[lumpy_lib])
+unittest_src    = [Glob('unittest/*.cc'), Glob('unittest/*/*.cc')]
+unittest_app    = env.Program('bin/lumpy.unittest', unittest_src, LIBS=lumpy_libs+[lumpy_lib])

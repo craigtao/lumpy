@@ -202,6 +202,42 @@ void JTree::parse(cstring s, size_t size) {
     }
 }
 
+void ITree::operator>>(std::string& value) const {
+    if (node_->type() != JType::String) { throw EUnexpect(); }
+    auto node = reinterpret_cast<JString*>(node_);
+    auto src = node->value();
+    auto end = src+node->size();
+
+    value.reserve(node->size());
+    for(auto c = *src; c=*src, src<end; ++src) {
+        if (c=='\\') {
+            auto x = *++src;
+            switch(x) {
+            case 'a': value.push_back('\a'); break;
+            case 'b': value.push_back('\b'); break;
+            case 'e': value.push_back('\033'); break;
+            case 'r': value.push_back('\r'); break;
+            case 'n': value.push_back('\n'); break;
+            case 't': value.push_back('\t'); break;
+            default:  value.push_back(c); value.push_back(x); break;
+            }
+        }
+        else {
+            value.push_back(c);
+        }
+    }
+}
+
+void ITree::operator<<(const std::string& value) {
+    if (node_->type() == JType::Null) {
+        node_->type(JType::String);
+        buffer_->grow(1);
+    }
+    if (node_->type() != JType::String) { throw EUnexpect(); }
+    auto node = reinterpret_cast<JString*>(node_);
+    node->value(value.c_str(), uint(value.size()));
+}
+
 void JTree::staticInit() {
     static_assert(sizeof(JNode)   == sizeof(JNull),   "bad json size");
     static_assert(sizeof(JNode)   == sizeof(JTrue),   "bad json size");
@@ -234,9 +270,26 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
 
         case JType::String: {
             auto* obj = reinterpret_cast<const JString*>(&head);
-            buffer.push('"');
-            buffer.push(obj->value(), obj->size());
-            buffer.push('"');
+            static thread_local char jbuff[4096];
+            auto src = obj->value();
+            auto end = src+obj->size();
+            auto dst = jbuff;
+
+            *dst++ = '"';
+            for(uint i =0; i < uint(sizeof(jbuff)-1) && src<end; ++i, ++src) {
+                auto c = *src;
+                switch(c) {
+                case '\a':  *dst++ = '\\'; *dst++ = 'a'; break;
+                case '\b':  *dst++ = '\\'; *dst++ = 'b'; break;
+                case '\033':*dst++ = '\\'; *dst++ = 'e'; break;
+                case '\r':  *dst++ = '\\'; *dst++ = 'r'; break;
+                case '\n':  *dst++ = '\\'; *dst++ = 'n'; break;
+                case '\t':  *dst++ = '\\'; *dst++ = 't'; break;
+                default:    *dst++ = c;    break;
+                }
+            }
+            *dst++= '"';
+            buffer.push(jbuff, dst-jbuff);
             break;
         }
 

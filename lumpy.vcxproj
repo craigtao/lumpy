@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lumpy\array_list.h" />
+    <ClInclude Include="lumpy\config.h" />
+    <ClInclude Include="lumpy\config\build.h" />
+    <ClInclude Include="lumpy\config\cxxabi.h" />
+    <ClInclude Include="lumpy\config\intrin.h" />
+    <ClInclude Include="lumpy\config\version.h" />
+    <ClInclude Include="lumpy\core.h" />
+    <ClInclude Include="lumpy\core\algorithm.h" />
+    <ClInclude Include="lumpy\core\array.h" />
+    <ClInclude Include="lumpy\core\datetime.h" />
+    <ClInclude Include="lumpy\core\dollar.h" />
+    <ClInclude Include="lumpy\core\exception.h" />
+    <ClInclude Include="lumpy\core\format.h" />
+    <ClInclude Include="lumpy\core\immutable.h" />
+    <ClInclude Include="lumpy\core\memory.h" />
+    <ClInclude Include="lumpy\core\string.h" />
+    <ClInclude Include="lumpy\core\traits.h" />
+    <ClInclude Include="lumpy\core\tuple.h" />
+    <ClInclude Include="lumpy\core\type.h" />
+    <ClInclude Include="lumpy\core\vec.h" />
+    <ClInclude Include="lumpy\cuda.h" />
+    <ClInclude Include="lumpy\io.h" />
+    <ClInclude Include="lumpy\io\file.h" />
+    <ClInclude Include="lumpy\io\filesystem.h" />
+    <ClInclude Include="lumpy\log.h" />
+    <ClInclude Include="lumpy\log\common.h" />
+    <ClInclude Include="lumpy\log\logger.h" />
+    <ClInclude Include="lumpy\math.h" />
+    <ClInclude Include="lumpy\math\array.h" />
+    <ClInclude Include="lumpy\math\common.h" />
+    <ClInclude Include="lumpy\math\expr.h" />
+    <ClInclude Include="lumpy\math\run.h" />
+    <ClInclude Include="lumpy\math\slice.h" />
+    <ClInclude Include="lumpy\ptree.h" />
+    <ClInclude Include="lumpy\ptree\json.h" />
+    <ClInclude Include="lumpy\ptree\ptree.h" />
+    <ClInclude Include="lumpy\test.h" />
+    <ClInclude Include="lumpy\test\expect.h" />
+    <ClInclude Include="lumpy\test\unittest.h" />
+    <ClInclude Include="lumpy\thread.h" />
+    <ClInclude Include="lumpy\thread\common.h" />
+    <ClInclude Include="lumpy\thread\semaphore.h" />
+    <ClInclude Include="lumpy\thread\task.h" />
+    <ClInclude Include="lumpy\thread\threadpool.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="lumpy\config\cxxabi.cc" />
+    <ClCompile Include="lumpy\core\exception.cc" />
+    <ClCompile Include="lumpy\core\format.cc" />
+    <ClCompile Include="lumpy\core\memory.cc" />
+    <ClCompile Include="lumpy\io\file.cc" />
+    <ClCompile Include="lumpy\log\console_backend.cc" />
+    <ClCompile Include="lumpy\log\logger.cc" />
+    <ClCompile Include="lumpy\ptree\json.cc" />
+    <ClCompile Include="lumpy\test\unittest.cc" />
+    <ClCompile Include="lumpy\thread\semaphore.cc" />
+    <ClCompile Include="lumpy\thread\task.cc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{282F5E78-D5C2-4277-860E-93D82E6BEEC9}</ProjectGuid>
+    <ProjectName>lumpy</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\app\lib\</OutDir>
+    <IntDir>$(SolutionDir)\.vs\$(ProjectName){$(Platform).$(Configuration)}\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\app\lib\</OutDir>
+    <IntDir>$(SolutionDir)\.vs\$(ProjectName){$(Platform).$(Configuration)}\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile />
+    <Link>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <AdditionalLibraryDirectories>$(CUDA_PATH)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent />
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(CUDA_PATH)\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent />
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

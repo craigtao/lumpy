@@ -128,6 +128,10 @@ struct ITree
         node->value(double(value));
     }
 
+    void operator>>(std::string& value) const;
+
+    void operator<<(const std::string& value);
+
     struct ArrayItr
     {
       public:
