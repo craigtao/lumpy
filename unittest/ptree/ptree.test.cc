@@ -12,7 +12,8 @@ struct Inter
 {
     double  dval;
     int     ints[3];
-    auto ptree() { return ($["dval"]=dval, $["ints"]=ints); }
+    string  strs[2];
+    auto ptree() { return ($["dval"]=dval, $["ints"]=ints, $["strs"]=strs); }
 };
 
 struct Outer
@@ -29,7 +30,8 @@ lumpy_unit(ptree) {
         "s": "~=>\taa\n~=>\tbb",
         "a": {
             "dval": 12.34,
-            "ints": [ 1, 2, 3]
+            "ints": [ 1, 2, 3],
+            "strs": ["hello", "world"]
         },
         "b": {
             "dval": 33.44,

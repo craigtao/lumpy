@@ -43,22 +43,22 @@
   </Type>
 
   <Type Name="lumpy::json::JNode">
-    <DisplayString Condition="type==0">null </DisplayString>
-    <DisplayString Condition="type==1">true </DisplayString>
-    <DisplayString Condition="type==2">false</DisplayString>
-    <DisplayString Condition="type==3">{*(double*)(this+1)}</DisplayString>
-    <DisplayString Condition="type==4">{*(char**)(this+1), [size]s}</DisplayString>
-    <DisplayString Condition="type==6">[array ] [{size}]</DisplayString>
-    <DisplayString Condition="type==7">[object] {{{size}}} </DisplayString>
+    <DisplayString Condition="type_==0">null </DisplayString>
+    <DisplayString Condition="type_==1">true </DisplayString>
+    <DisplayString Condition="type_==2">false</DisplayString>
+    <DisplayString Condition="type_==3">{*(double*)(this+1)}</DisplayString>
+    <DisplayString Condition="type_==4">{*(char**)(this+1), [size_]s}</DisplayString>
+    <DisplayString Condition="type_==6">[array ] [{size_}]</DisplayString>
+    <DisplayString Condition="type_==7">[object] {{{size_}}} </DisplayString>
     <Expand>
-      <LinkedListItems Condition="type==6 || type==7">
-        <Size>size</Size>
+      <LinkedListItems Condition="type_==6 || type_==7">
+        <Size>size_</Size>
         <HeadPointer>this+1</HeadPointer>
-        <NextPointer>this+right</NextPointer>
+        <NextPointer>this+next_</NextPointer>
         <ValueNode>*this</ValueNode>
       </LinkedListItems>
-      <Item Name="key"   Condition="type==5">*(char**)(this+1), [size]s</Item>
-      <Item Name="value" Condition="type==5">*(this+2)</Item>
+      <Item Name="key"   Condition="type_==5">*(char**)(this+1), [size_]s</Item>
+      <Item Name="value" Condition="type_==5">*(this+2)</Item>
     </Expand>
   </Type>
 

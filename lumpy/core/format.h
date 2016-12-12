@@ -46,23 +46,18 @@ inline void sformat(IStringBuffer& buffer, cstring  value, const FormatSpec& spe
 inline void sformat(IStringBuffer& buffer, null_t<> value, const FormatSpec& spec={}) { sformat(buffer, "null", spec);                      }
 inline void sformat(IStringBuffer& buffer, bool     value, const FormatSpec& spec={}) { value ? sformat(buffer, "true", spec) : sformat(buffer, "false", spec); }
 
-inline void sformat(IStringBuffer& buffer, int      value, const FormatSpec& spec={}) { formatInt(buffer,   value, spec); 		}
-inline void sformat(IStringBuffer& buffer, uint     value, const FormatSpec& spec={}) { formatInt(buffer,   value, spec); 		}
-inline void sformat(IStringBuffer& buffer, llong    value, const FormatSpec& spec={}) { formatInt(buffer,   value, spec); 		}
-inline void sformat(IStringBuffer& buffer, ullong   value, const FormatSpec& spec={}) { formatInt(buffer,   value, spec); 		}
-inline void sformat(IStringBuffer& buffer, float    value, const FormatSpec& spec={}) { formatFloat(buffer, value, spec); 		}
-inline void sformat(IStringBuffer& buffer, double   value, const FormatSpec& spec={}) { formatFloat(buffer, value, spec); 		}
+inline void sformat(IStringBuffer& buffer, int      value, const FormatSpec& spec={}) { formatInt(buffer,   int32_t(value), spec);  }
+inline void sformat(IStringBuffer& buffer, uint     value, const FormatSpec& spec={}) { formatInt(buffer,   int32_t(value), spec);  }
+inline void sformat(IStringBuffer& buffer, llong    value, const FormatSpec& spec={}) { formatInt(buffer,   int64_t(value), spec);  }
+inline void sformat(IStringBuffer& buffer, ullong   value, const FormatSpec& spec={}) { formatInt(buffer,   int64_t(value), spec);  }
+inline void sformat(IStringBuffer& buffer, float    value, const FormatSpec& spec={}) { formatFloat(buffer, value, spec);           }
+inline void sformat(IStringBuffer& buffer, double   value, const FormatSpec& spec={}) { formatFloat(buffer, value, spec);           }
 
 inline void sformat(IStringBuffer& buffer, long     value, const FormatSpec& spec={}) {
-    sizeof(long)==sizeof(int32_t)
-            ? formatInt(buffer, int32_t(value), spec)
-            : formatInt(buffer, int64_t(value), spec);
+    sizeof(long)==sizeof(int32_t)?  formatInt(buffer, int32_t(value), spec): formatInt(buffer, int64_t(value), spec);
 }
-
 inline void sformat(IStringBuffer& buffer, ulong     value, const FormatSpec& spec={}) {
-    sizeof(ulong)==sizeof(uint32_t)
-            ? formatInt(buffer, uint32_t(value), spec)
-            : formatInt(buffer, uint64_t(value), spec);
+    sizeof(ulong)==sizeof(uint32_t)? formatInt(buffer, uint32_t(value), spec): formatInt(buffer, uint64_t(value), spec);
 }
 
 inline void sformat(IStringBuffer& buffer, const IException& value, const FormatSpec& spec=FormatSpec{}) { value.sformat(buffer, spec);}

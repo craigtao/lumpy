@@ -175,4 +175,7 @@
       <Filter>thread</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="tools\lumpy.natvis" />
+  </ItemGroup>
 </Project>

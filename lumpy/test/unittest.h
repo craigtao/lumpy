@@ -43,7 +43,7 @@ class IUnittest: public _Unittest
 public:
     using base = _Unittest;
 
-    static int static_init() {
+    static int static_init(...) {
         static int value =  base::install(typeid(T), &new_, &del_);
         return value;
     }
@@ -68,12 +68,12 @@ int invokeUnittest(const char* type = nullptr, const char* name = nullptr);
 
 }
 
-#define lumpy_unit(name)                                                                      \
-    class name##_test;                                                                      \
-    static int g_##name##_test_initor = test::IUnittest<name##_test>::static_init();        \
+#define lumpy_unit(name)                                                                                    \
+    class name##_test;                                                                                      \
+    static int g_##name##_test_initor = test::IUnittest<name##_test>::static_init(&g_##name##_test_initor); \
     class name##_test: public test::IUnittest<name##_test>
 
-#define lumpy_test(name)                                                                      \
-    static void name##_test(void* obj) { cast(obj)->name();}                                \
-    int         name##_test_initor = install(&name##_test, #name, __FILE__, __LINE__);      \
+#define lumpy_test(name)                                                                                    \
+    static void name##_test(void* obj) { cast(obj)->name();}                                                \
+    int         name##_test_initor = install(&name##_test, #name, __FILE__, __LINE__);                      \
     void name()

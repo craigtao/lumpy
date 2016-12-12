@@ -69,6 +69,9 @@
     <ClCompile Include="lumpy\thread\semaphore.cc" />
     <ClCompile Include="lumpy\thread\task.cc" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="tools\lumpy.natvis" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{282F5E78-D5C2-4277-860E-93D82E6BEEC9}</ProjectGuid>
     <ProjectName>lumpy</ProjectName>

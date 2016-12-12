@@ -1,7 +1,7 @@
 import os;
 
 env = Environment(
-    CXX         = 'clang++',
+#   CXX         = 'clang++',
     CPPPATH     = ['.'],
     CCFLAGS     = '-D_LUMPY_BUILD_ ',
     CXXFLAGS    = '--std=c++14 -Wall ')

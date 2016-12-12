@@ -91,9 +91,9 @@ struct JKeyVal: JNode {
     const JNode&    value() const       { return *(this+1); }
     JNode&          value()             { return *(this+1); }
 
-    const JKeyVal*  next() const        { return static_cast<const JKeyVal*>(JNode::next());    }
-    JKeyVal*        next()              { return static_cast<JKeyVal*>(JNode::next());          }
-    void            next(JKeyVal* node) { next_ = 2*(node-this);                                }
+    const JKeyVal*  next() const        { return static_cast<const JKeyVal*>(JNode::next());                }
+    JKeyVal*        next()              { return static_cast<JKeyVal*>(JNode::next());                      }
+    void            next(JKeyVal* node) { next_ = (static_cast<JNode*>(node)-static_cast<JNode*>(this));    }
 
   protected:
     cstring key_;
@@ -107,7 +107,8 @@ struct ITree;
 struct ArrayTree;
 struct ObjectTree;
 
-class  EUnexpect{};
+class  EUnexpect: public IException
+{};
 
 struct ITree
 {
@@ -142,7 +143,7 @@ struct ITree
         }
 
         ArrayItr(IBuffer<JNode>* buffer, JNode* root)
-                : buffer_(buffer),  root_((JArray*)root)
+                : buffer_(buffer),  root_(static_cast<JArray*>(root))
         {
             if (root_->type() == JType::Null)   root_->type(JType::Array);
             if (root_->type() != JType::Array)  throw EUnexpect{};
@@ -234,7 +235,8 @@ struct ITree
         }
 
         bool match(cstring str) const {
-            if (node_->type() != JType::KeyVal) throw EUnexpect{};
+            if (node_         == nullptr)       return false;
+            if (node_->type() !=JType::KeyVal)  throw EUnexpect{};
             auto test = strncmp(node_->key(), str, node_->size());
             return test == 0;
         }

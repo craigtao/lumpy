@@ -314,10 +314,15 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
         }
 
         case JType::Object: {
-            if (head.size() != 0) {
+            auto size = head.size();
+            if (size != 0) {
                 buffer.push("{\n");
                 auto item = &head + 1;
-                while (item != nullptr) {
+                for(uint i = 0; i < size; ++i) {
+                    if (item->type()!=JType::KeyVal) {
+                        throw EUnexpect{};
+                    }
+
                     auto& key = *reinterpret_cast<const JKeyVal*>(item);
                     auto& val = key.value();
                     sindent(buffer, level+1, true);
@@ -327,8 +332,8 @@ void sformat(IStringBuffer& buffer, const JNode& head, const FormatSpec& spec, u
                     buffer.push("\": ");
 
                     sformat(buffer, val, spec, level+1, false);
-                    item = item->next();
 
+                    item = item->next();
                     if (item != nullptr) buffer.push(",\n");
                     else                 buffer.push("\n");
                 }
