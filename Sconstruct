@@ -13,6 +13,9 @@ if (config == 'release'):
 else:
     env.Append(CCFLAGS = '-g -O0')
 
+if env['PLATFORM'] != 'win32':
+   env['ENV']['TERM'] = os.environ['TERM']
+   
 lumpy_libs      = []
 if env['PLATFORM'] == 'posix':  # linux
     lumpy_libs  = lumpy_libs + ['pthread']
