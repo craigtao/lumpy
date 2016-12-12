@@ -27,9 +27,6 @@
       <Project>{282f5e78-d5c2-4277-860e-93d82e6beec9}</Project>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="unittest\ptree\ajson.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{85096893-8BD1-4885-85C2-0F2755B9012B}</ProjectGuid>
     <ProjectName>lumpy.unittest</ProjectName>
